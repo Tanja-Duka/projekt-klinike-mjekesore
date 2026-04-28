@@ -1,0 +1,29 @@
+# ============================================================
+# .gitignore - Skedarët që NUK shkarkohen në GitHub
+# ============================================================
+
+# Environment (fjalëkalimet dhe çelësat)
+.env
+
+# Recetat e ngarkuara (private)
+uploads/prescriptions/*
+!uploads/prescriptions/.gitkeep
+
+# Vendor (Composer)
+vendor/
+
+# Cache dhe log
+*.log
+cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+config/config.php
+

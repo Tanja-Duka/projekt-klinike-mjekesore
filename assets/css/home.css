@@ -1,0 +1,22 @@
+/* ============================================================
+   home.css - Faqja kryesore dhe publike
+   ============================================================ */
+
+/* TODO: .hero (position: relative, height: 100vh, background-image, overlay) */
+/* TODO: .hero-content (position: absolute, center vertical+horizontal) */
+/* TODO: .hero-title (font-size: 3rem, color white, text-shadow) */
+/* TODO: .hero-subtitle (font-size: 1.3rem, color white, opacity 0.9) */
+/* TODO: .hero-cta (margin-top: 2rem, .btn-primary large) */
+/* TODO: .section (padding: 5rem 0) */
+/* TODO: .section-title (text-center, font-size: 2rem, margin-bottom: 3rem) */
+/* TODO: .services-grid (grid, repeat(auto-fill, minmax(250px, 1fr)), gap: 1.5rem) */
+/* TODO: .service-card (padding, border-radius, shadow, hover lift effect) */
+/* TODO: .service-icon (font-size: 2.5rem, color primary, margin-bottom) */
+/* TODO: .service-price (font-weight bold, color accent) */
+/* TODO: .doctors-grid (grid, repeat(auto-fill, minmax(220px, 1fr)), gap) */
+/* TODO: .doctor-card (text-center, padding, border-radius, shadow, hover) */
+/* TODO: .doctor-photo (width: 120px, height: 120px, border-radius: 50%, object-fit: cover) */
+/* TODO: .stats-section (background primary, color white, padding: 4rem 0) */
+/* TODO: .stats-grid (grid, 4 kolona, text-center) */
+/* TODO: .stat-number-big (font-size: 3rem, font-weight bold) */
+/* TODO: .how-it-works (3 hapa me ikona, lidhur me vija) */
