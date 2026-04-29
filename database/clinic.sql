@@ -211,3 +211,6 @@ VALUES
 (1, 'admin', 'login', '127.0.0.1'),
 (2, 'doctor', 'login', '127.0.0.1'),
 (4, 'patient', 'login', '127.0.0.1');
+
+
+-- final database version
