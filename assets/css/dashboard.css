@@ -1,0 +1,23 @@
+/* ============================================================
+   dashboard.css - Panelet e roleve
+   ============================================================ */
+
+/* TODO: .dashboard-wrapper (display: flex, min-height: 100vh) */
+/* TODO: .sidebar (width: 250px, background dark, flex-shrink: 0) */
+/* TODO: .sidebar-header (logo + emri klinikës) */
+/* TODO: .sidebar-nav (list-style: none, padding: 0) */
+/* TODO: .sidebar-link (flex, padding, color, hover background, active) */
+/* TODO: .sidebar-link .icon (margin-right) */
+/* TODO: .main-content (flex: 1, padding: 2rem, overflow-y: auto) */
+/* TODO: .page-title (font-size: 1.5rem, margin-bottom: 1.5rem) */
+/* TODO: .stats-grid (display: grid, grid-template-columns: repeat(4, 1fr), gap) */
+/* TODO: .stat-card (background, padding, border-radius, shadow, text-center) */
+/* TODO: .stat-number (font-size: 2rem, font-weight: bold, color primary) */
+/* TODO: .stat-label (color text-light, font-size: 0.9rem) */
+/* TODO: .data-table (width: 100%, border-collapse, stripe rows) */
+/* TODO: .data-table th (background primary, color white, padding) */
+/* TODO: .data-table td (padding, border-bottom) */
+/* TODO: .status-badge (inline-block, padding, border-radius, font-size small) */
+/* TODO: .status-pending, .status-confirmed, .status-cancelled, .status-completed */
+/* TODO: .action-btn (small button, icon only or icon+text) */
+/* TODO: @media (max-width: 768px): sidebar hidden, hamburger menu */

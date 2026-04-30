@@ -1,0 +1,25 @@
+# ============================================================
+# .htaccess - Konfigurimi i sigurisë dhe URL rewrite
+# ============================================================
+
+# Fsheh skedarët sensitive
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "config.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Blloko aksesin direkt tek uploads/
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^uploads/prescriptions/(.*)$ - [F,L]
+</IfModule>
+
+# Fsheh listimin e direktorive
+Options -Indexes
+
+# TODO: Shto URL rewriting nëse dëshiron URL të pastra (opsionale)

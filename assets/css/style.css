@@ -1,0 +1,101 @@
+/* ============================================================
+   style.css - Bazë, CSS Variables, Reset, Typography
+   ============================================================ */
+
+/* TODO: :root { --color-primary; --color-secondary; --color-accent;
+               --color-text; --color-text-light; --color-bg;
+               --font-main; --font-heading;
+               --border-radius; --shadow; --transition; } */
+
+/* TODO: CSS Reset (*, box-sizing: border-box) */
+/* TODO: Typography (body, h1-h6, p, a) */
+/* TODO: .container (max-width: 1200px, margin: auto) */
+/* TODO: .btn, .btn-primary, .btn-secondary, .btn-danger, .btn-google */
+/* TODO: .alert-success, .alert-error, .alert-info */
+/* TODO: .loading-spinner */
+/* TODO: Responsive breakpoints (768px, 1024px) */
+
+/* Stili specifik për Vitanova Services */
+.services-vitanova {
+    padding: 80px 0;
+    background-color: #ffffff;
+}
+
+.vitanova-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.vitanova-header h1 {
+    color: var(--color-primary); /* Bluja e errët */
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.vitanova-header p {
+    color: var(--color-text-light);
+    font-size: 1.1rem;
+}
+
+/* Gridi me 5 kolona si në foto */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 30px;
+}
+
+.service-card {
+    text-align: center;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    border: 1px solid transparent; /* Që të mos lëvizë kur bëjmë hover */
+}
+
+.service-card:hover {
+    background-color: var(--color-accent); /* Ngjyra shumë e lehtë në hover */
+    transform: translateY(-5px);
+}
+
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #eee;
+    border-radius: 50%; /* E bën rreth si në foto */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: var(--color-primary);
+    transition: var(--transition);
+}
+
+.service-card:hover .icon-circle {
+    background-color: var(--color-secondary); /* Bëhet jeshile kur kalon mausin */
+    color: white;
+}
+
+.service-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 10px;
+    min-height: 45px; /* I rreshton titujt në një vijë */
+}
+
+.price-tag {
+    display: block;
+    color: var(--color-secondary);
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.btn-text {
+    color: var(--color-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}

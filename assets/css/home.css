@@ -1,0 +1,147 @@
+/* ============================================================
+   home.css - Faqja kryesore dhe publike
+   ============================================================ */
+
+/* TODO: .hero (position: relative, height: 100vh, background-image, overlay) */
+/* TODO: .hero-content (position: absolute, center vertical+horizontal) */
+/* TODO: .hero-title (font-size: 3rem, color white, text-shadow) */
+/* TODO: .hero-subtitle (font-size: 1.3rem, color white, opacity 0.9) */
+/* TODO: .hero-cta (margin-top: 2rem, .btn-primary large) */
+/* TODO: .section (padding: 5rem 0) */
+/* TODO: .section-title (text-center, font-size: 2rem, margin-bottom: 3rem) */
+/* TODO: .services-grid (grid, repeat(auto-fill, minmax(250px, 1fr)), gap: 1.5rem) */
+/* TODO: .service-card (padding, border-radius, shadow, hover lift effect) */
+/* TODO: .service-icon (font-size: 2.5rem, color primary, margin-bottom) */
+/* TODO: .service-price (font-weight bold, color accent) */
+/* TODO: .doctors-grid (grid, repeat(auto-fill, minmax(220px, 1fr)), gap) */
+/* TODO: .doctor-card (text-center, padding, border-radius, shadow, hover) */
+/* TODO: .doctor-photo (width: 120px, height: 120px, border-radius: 50%, object-fit: cover) */
+/* TODO: .stats-section (background primary, color white, padding: 4rem 0) */
+/* TODO: .stats-grid (grid, 4 kolona, text-center) */
+/* TODO: .stat-number-big (font-size: 3rem, font-weight bold) */
+/* TODO: .how-it-works (3 hapa me ikona, lidhur me vija) */
+
+
+
+/* ============================================================
+   home.css - Faqja kryesore dhe publike
+   ============================================================ */
+
+/* --- HERO SECTION --- */
+.hero-vitanova {
+    position: relative;
+    height: 90vh; /* Afro 100vh sipas TODO */
+    background-image: url('../images/vitanova-hero.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+/* Overlay që e bën tekstin të lexueshëm (TODO: overlay) */
+.hero-vitanova::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(26, 54, 93, 0.6); /* Bluja jote me transparencë */
+    z-index: 1;
+}
+
+.hero-flex {
+    position: relative;
+    z-index: 2; /* Teksti del sipër overlay-it */
+}
+
+.hero-text h1 {
+    font-size: 3.5rem; /* TODO: .hero-title */
+    color: white;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    margin-bottom: 1rem;
+}
+
+.hero-text p {
+    font-size: 1.3rem; /* TODO: .hero-subtitle */
+    opacity: 0.9;
+}
+
+/* --- SECTIONS --- */
+.section {
+    padding: 5rem 0; /* TODO: .section */
+}
+
+.section-title {
+    text-align: center; /* TODO: .section-title */
+    font-size: 2.2rem;
+    color: var(--color-primary);
+    margin-bottom: 3rem;
+}
+
+/* --- SERVICES GRID (TODO: grid, minmax) --- */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.service-card {
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    background: white;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s ease; /* TODO: hover lift effect */
+    text-align: center;
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+}
+
+.service-icon {
+    font-size: 2.5rem; /* TODO: .service-icon */
+    color: var(--color-secondary);
+    margin-bottom: 1rem;
+}
+
+/* --- DOCTORS GRID (TODO: doctor-photo 120px) --- */
+.doctors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 2rem;
+}
+
+.doctor-card {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.doctor-photo {
+    width: 120px; /* TODO: .doctor-photo */
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border: 3px solid var(--color-accent);
+}
+
+/* --- STATS SECTION (TODO: 4 kolona, background primary) --- */
+.stats-section {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 4rem 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 kolona sipas TODO */
+    text-align: center;
+}
+
+.stat-number-big {
+    font-size: 3rem; /* TODO: .stat-number-big */
+    font-weight: bold;
+    display: block;
+}
