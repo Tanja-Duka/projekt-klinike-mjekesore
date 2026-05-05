@@ -2,11 +2,230 @@
    navbar.css - Navigimi kryesor
    ============================================================ */
 
-/* TODO: .navbar (flex, sticky top, background, shadow, z-index) */
-/* TODO: .navbar-logo (font-size, color, text-decoration) */
-/* TODO: .navbar-menu (flex, list-style: none, gap) */
-/* TODO: .navbar-menu a (color, padding, hover underline/color) */
-/* TODO: .navbar-search (input + buton kërkim) */
-/* TODO: .user-info (emri + foto e vogël e userit) */
-/* TODO: .hamburger (display: none në desktop) */
-/* TODO: @media (max-width: 768px): hamburger visible, menu dropdown */
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #fff;
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: 0 2px 12px rgba(30,107,114,0.07);
+}
+
+.navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+    gap: 24px;
+}
+
+/* ---- Logo ---- */
+.navbar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.navbar-logo-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--color-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.3rem;
+}
+
+.navbar-logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+.navbar-logo-text strong {
+    font-size: 1.2rem;
+    color: var(--color-primary);
+    font-weight: 800;
+}
+.navbar-logo-text span {
+    font-size: 0.65rem;
+    color: var(--color-secondary);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* ---- Menu ---- */
+.navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+}
+
+.navbar-menu a {
+    display: block;
+    padding: 8px 14px;
+    color: var(--color-text);
+    font-weight: 500;
+    font-size: 0.95rem;
+    border-radius: var(--radius-sm);
+    transition: var(--transition);
+    text-decoration: none;
+}
+.navbar-menu a:hover,
+.navbar-menu a.active {
+    color: var(--color-primary);
+    background: rgba(30,107,114,0.07);
+}
+
+/* ---- Aksionet djathtas (CTA + user info) ---- */
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* Info user i loguar */
+.navbar-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.navbar-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.navbar-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---- Hamburger (mobile) ---- */
+.navbar-hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+}
+.navbar-hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--color-text);
+    border-radius: 2px;
+    transition: var(--transition);
+}
+
+/* ---- Search bar (navbar) ---- */
+.navbar-search {
+    position: relative;
+    max-width: 260px;
+    flex: 1;
+}
+.navbar-search input {
+    width: 100%;
+    padding: 8px 40px 8px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 24px;
+    font-size: 0.9rem;
+    background: var(--color-bg);
+    color: var(--color-text);
+    outline: none;
+    transition: var(--transition);
+}
+.navbar-search input:focus {
+    border-color: var(--color-primary);
+    background: #fff;
+}
+.navbar-search-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+/* Dropdown rezultate kërkimi */
+.search-results {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+}
+.search-results.open { display: block; }
+.search-result-section { padding: 10px 14px 4px; font-size: 0.75rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: background var(--transition);
+    font-size: 0.9rem;
+    color: var(--color-text);
+    text-decoration: none;
+}
+.search-result-item:hover { background: var(--color-bg); }
+.search-result-item small { color: var(--color-text-muted); font-size: 0.8rem; }
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+    .navbar-search { display: none; }
+}
+
+@media (max-width: 768px) {
+    .navbar-hamburger { display: flex; }
+
+    .navbar-menu {
+        display: none;
+        position: absolute;
+        top: 68px;
+        left: 0;
+        right: 0;
+        background: #fff;
+        flex-direction: column;
+        padding: 12px 16px 20px;
+        border-bottom: 1px solid var(--color-border);
+        box-shadow: var(--shadow-md);
+        gap: 2px;
+        z-index: 999;
+    }
+    .navbar-menu.open { display: flex; }
+    .navbar-menu a { padding: 12px 16px; font-size: 1rem; }
+    .navbar-inner { position: relative; }
+    .navbar-actions .btn { padding: 8px 16px; font-size: 0.85rem; }
+    .navbar-user-name { display: none; }
+}
+

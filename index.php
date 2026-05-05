@@ -1,7 +1,14 @@
 <?php
 // ============================================================
-// index.php - Pika hyrëse e aplikacionit
+// index.php - Pika hyrëse: ridrejto tek faqja kryesore
 // ============================================================
 
-// TODO: require_once config/config.php
-// TODO: Ridrejto tek public/home.php
+require_once __DIR__ . '/config/config.php';
+
+// Nëse useri është i loguar ridrejto direkt tek dashboard-i i tij
+if (isLoggedIn()) {
+    redirectByRole();
+}
+
+redirect(BASE_URL . '/public/home.php');
+

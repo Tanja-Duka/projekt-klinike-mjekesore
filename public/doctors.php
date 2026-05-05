@@ -1,59 +1,64 @@
-<?php
-// ============================================================
-// public/doctors.php - LOGJIKA PHP (backend)
-// 
-// frontend shton HTML/CSS poshtë këtij kodi
-// ============================================================
-defined('BASE_PATH') or define('BASE_PATH', dirname(__DIR__));
-require_once BASE_PATH . '/config/config.php';
-
-// ---- Filtrim sipas specializimit (nga URL ?specialization=Kardiologji) ----
-$filterSpec = clean($_GET['specialization'] ?? '');
-
-// ---- Merr mjekët nga DB ----
-if (!empty($filterSpec)) {
-    $doctors = getDoctorsBySpecialization($filterSpec);
-} else {
-    $doctors = getAllDoctors();
-}
-
-// ---- Specializimet unike për filter dropdown ----
-$specializations = db()->fetchAll(
-    "SELECT DISTINCT specialization
-     FROM users
-     WHERE role = 'doctor' AND is_active = 1
-     AND specialization IS NOT NULL
-     ORDER BY specialization ASC"
-);
-
-// ---- URL rezervimi sipas rolit ----
-// Përdoret kështu në HTML:
-// <a href="<?= $reserveBaseUrl ?>?doctor_id=<?= $doctor['id'] ?>">Rezervo</a>
-$reserveBaseUrl = (isLoggedIn() && hasRole(ROLE_PATIENT))
-    ? BASE_URL . '/patient/reserve.php'
-    : BASE_URL . '/public/register.php';
-
 $pageTitle = 'Mjekët Tanë — ' . APP_NAME;
+$cssFile   = 'home.css';
 include BASE_PATH . '/includes/header.php';
 include BASE_PATH . '/includes/navbar.php';
+?>
 
-// ============================================================
-// FRONTEND SHTON HTML KËTU
-// Variablat e disponueshme:
-//   $doctors        → array me mjekët (filtrim ose të gjithë)
-//   $specializations → array për dropdown filter
-//   $filterSpec     → specializimi aktual i zgjedhur
-//   $reserveBaseUrl → URL bazë për butonin Rezervo
-//
-// Çdo $doctor ka: id, name, email, phone, specialization,
-//                 bio, photo_path, consultation_fee
-//
-// Funksione të gatshme:
-//   e($str)             → XSS safe output
-//   formatPrice($price) → "3,000 L"
-//   getInitials($name)  → "AH"
-//   getPhotoUrl($path)  → URL foto ose placeholder
-//   displayFlashMessage() → shfaq mesazhet flash
-// ============================================================
+<div class="page-header">
+    <div class="container">
+        <h1>Mjekët Tanë</h1>
+        <p>Ekip i kualifikuar specialistësh shëndetësorë në shërbimin tuaj</p>
+    </div>
+</div>
 
-include BASE_PATH . '/includes/footer.php';
+<section class="section-sm">
+    <div class="container">
+        <?php displayFlashMessage(); ?>
+
+        <!-- Filter sipas specializimit -->
+        <div class="filter-tabs mb-24">
+            <a href="<?= BASE_URL ?>/public/doctors.php"
+               class="filter-tab <?= empty($filterSpec) ? 'active' : '' ?>">Të gjithë</a>
+            <?php foreach ($specializations as $spec): ?>
+            <a href="<?= BASE_URL ?>/public/doctors.php?specialization=<?= urlencode($spec['specialization']) ?>"
+               class="filter-tab <?= $filterSpec === $spec['specialization'] ? 'active' : '' ?>">
+                <?= e($spec['specialization']) ?>
+            </a>
+            <?php endforeach; ?>
+        </div>
+
+        <?php if (empty($doctors)): ?>
+            <div class="empty-state">
+                <div class="empty-state-icon">&#128101;</div>
+                <h3>Nuk u gjetën mjekë</h3>
+                <p>Nuk ka mjekë për specializimin e zgjedhur.</p>
+                <a href="<?= BASE_URL ?>/public/doctors.php" class="btn btn-primary">Shiko të gjithë</a>
+            </div>
+        <?php else: ?>
+        <div class="doctors-grid">
+            <?php foreach ($doctors as $doctor): ?>
+            <div class="doctor-card">
+                <?php if (!empty($doctor['photo_path'])): ?>
+                    <img src="<?= BASE_URL . '/' . e($doctor['photo_path']) ?>"
+                         alt="<?= e($doctor['name']) ?>" class="doctor-photo">
+                <?php else: ?>
+                    <div class="doctor-initials"><?= e(getInitials($doctor['name'])) ?></div>
+                <?php endif; ?>
+
+                <h3><?= e($doctor['name']) ?></h3>
+                <p class="doctor-spec"><?= e($doctor['specialization'] ?? '') ?></p>
+                <?php if (!empty($doctor['bio'])): ?>
+                    <p style="font-size:0.84rem;margin-bottom:12px;"><?= e(mb_substr($doctor['bio'], 0, 80)) ?>...</p>
+                <?php endif; ?>
+                <p class="doctor-fee">Konsultim: <strong><?= formatPrice((float)$doctor['consultation_fee']) ?></strong></p>
+                <a href="<?= $reserveBaseUrl ?>?doctor_id=<?= (int)$doctor['id'] ?>" class="btn btn-primary btn-sm">
+                    Rezervo Takim
+                </a>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</section>
+
+<?php include BASE_PATH . '/includes/footer.php';

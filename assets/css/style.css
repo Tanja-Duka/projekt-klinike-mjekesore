@@ -1,16 +1,271 @@
 /* ============================================================
-   style.css - Bazë, CSS Variables, Reset, Typography
+   style.css - Bazë, CSS Variables, Reset, Typography, Utilities
    ============================================================ */
 
-/* TODO: :root { --color-primary; --color-secondary; --color-accent;
-               --color-text; --color-text-light; --color-bg;
-               --font-main; --font-heading;
-               --border-radius; --shadow; --transition; } */
+/* ---- Variablat kryesore ---- */
+:root {
+    --color-primary:      #1e6b72;
+    --color-primary-dark: #155059;
+    --color-secondary:    #2d8a7a;
+    --color-cta:          #3aaa6e;
+    --color-cta-dark:     #2e8c58;
+    --color-bg:           #f4f7f8;
+    --color-bg-white:     #ffffff;
+    --color-footer:       #1a2e3b;
+    --color-text:         #1a2e3b;
+    --color-text-muted:   #5f7a80;
+    --color-border:       #dce6e8;
+    --color-danger:       #d9534f;
+    --color-warning:      #e8a020;
+    --color-success:      #3aaa6e;
 
-/* TODO: CSS Reset (*, box-sizing: border-box) */
-/* TODO: Typography (body, h1-h6, p, a) */
-/* TODO: .container (max-width: 1200px, margin: auto) */
-/* TODO: .btn, .btn-primary, .btn-secondary, .btn-danger, .btn-google */
-/* TODO: .alert-success, .alert-error, .alert-info */
-/* TODO: .loading-spinner */
-/* TODO: Responsive breakpoints (768px, 1024px) */
+    --font-main:    'Segoe UI', Arial, sans-serif;
+    --radius-sm:    6px;
+    --radius-md:    12px;
+    --radius-lg:    20px;
+    --shadow-sm:    0 2px 8px rgba(30,107,114,0.08);
+    --shadow-md:    0 4px 20px rgba(30,107,114,0.14);
+    --transition:   0.25s ease;
+    --container:    1200px;
+}
+
+/* ---- Reset ---- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--font-main);
+    background: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.65;
+    font-size: 16px;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+a   { color: var(--color-primary); text-decoration: none; }
+a:hover { color: var(--color-primary-dark); }
+ul, ol { list-style: none; }
+
+/* ---- Tipografi ---- */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text);
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 0.5em;
+}
+h1 { font-size: 2.4rem; }
+h2 { font-size: 1.9rem; }
+h3 { font-size: 1.4rem; }
+h4 { font-size: 1.15rem; }
+
+p { margin-bottom: 1em; color: var(--color-text-muted); }
+
+/* ---- Container ---- */
+.container {
+    max-width: var(--container);
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ---- Seksion padding ---- */
+.section { padding: 72px 0; }
+.section-sm { padding: 40px 0; }
+
+.section-title {
+    font-size: 2rem;
+    color: var(--color-text);
+    margin-bottom: 8px;
+}
+.section-subtitle {
+    color: var(--color-text-muted);
+    font-size: 1.05rem;
+    margin-bottom: 48px;
+}
+
+/* ---- Butonat ---- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    border: 2px solid transparent;
+    border-radius: var(--radius-lg);
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+}
+.btn-primary:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    color: #fff;
+}
+
+.btn-cta {
+    background: var(--color-cta);
+    color: #fff;
+    border-color: var(--color-cta);
+    padding: 12px 32px;
+    font-size: 1rem;
+}
+.btn-cta:hover {
+    background: var(--color-cta-dark);
+    border-color: var(--color-cta-dark);
+    color: #fff;
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+.btn-outline:hover {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.btn-danger {
+    background: var(--color-danger);
+    color: #fff;
+    border-color: var(--color-danger);
+}
+.btn-danger:hover { background: #c0392b; border-color: #c0392b; color: #fff; }
+
+.btn-sm { padding: 6px 16px; font-size: 0.85rem; }
+.btn-lg { padding: 14px 40px; font-size: 1.05rem; }
+
+.btn-google {
+    background: #fff;
+    color: #333;
+    border-color: var(--color-border);
+    justify-content: center;
+    width: 100%;
+}
+.btn-google:hover { background: #f5f5f5; color: #333; }
+.btn-google img { width: 20px; }
+
+/* ---- Kartelat (cards) ---- */
+.card {
+    background: var(--color-bg-white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: 28px;
+    transition: var(--transition);
+}
+.card:hover { box-shadow: var(--shadow-md); }
+
+/* ---- Flash messages / Alerts ---- */
+.alert {
+    padding: 14px 20px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 20px;
+    font-weight: 500;
+    border-left: 4px solid transparent;
+}
+.alert-success { background: #eafaf1; color: #1a7a4a; border-color: var(--color-cta); }
+.alert-error   { background: #fdf0f0; color: #a94442; border-color: var(--color-danger); }
+.alert-info    { background: #eaf4fb; color: #1a5a7a; border-color: var(--color-primary); }
+.alert-warning { background: #fdf5e6; color: #8a6200; border-color: var(--color-warning); }
+
+/* ---- Status badges (takimet) ---- */
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+.status-pending   { background: #fff3cd; color: #856404; }
+.status-confirmed { background: #d1ecf1; color: #0c5460; }
+.status-completed { background: #d4edda; color: #155724; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+
+/* ---- Loading spinner ---- */
+.spinner {
+    width: 36px; height: 36px;
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 20px auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Tabelë generike ---- */
+.table-wrap { overflow-x: auto; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--color-border); }
+th { background: var(--color-bg); color: var(--color-text); font-weight: 600; }
+tbody tr:hover { background: #f0f7f8; }
+
+/* ---- Faqosja (paginacion) ---- */
+.pagination {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 28px;
+    flex-wrap: wrap;
+}
+.pagination a, .pagination span {
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    font-size: 0.9rem;
+    color: var(--color-primary);
+    background: #fff;
+}
+.pagination .active { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.pagination a:hover { background: var(--color-bg); }
+
+/* ---- Utilitete ---- */
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+.text-muted  { color: var(--color-text-muted); font-size: 0.9rem; }
+.fw-bold     { font-weight: 700; }
+.mt-8  { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-8  { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.mb-24 { margin-bottom: 24px; }
+.d-flex         { display: flex; }
+.align-center   { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-8  { gap: 8px; }
+.gap-16 { gap: 16px; }
+.w-100  { width: 100%; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1024px) {
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.6rem; }
+    .section { padding: 56px 0; }
+}
+
+@media (max-width: 768px) {
+    h1 { font-size: 1.7rem; }
+    h2 { font-size: 1.4rem; }
+    .section { padding: 40px 0; }
+    .container { padding: 0 16px; }
+    table { font-size: 0.85rem; }
+    th, td { padding: 10px 12px; }
+}
+
