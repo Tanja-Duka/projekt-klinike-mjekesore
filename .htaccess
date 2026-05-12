@@ -4,13 +4,11 @@
 
 # Fsheh skedarët sensitive
 <Files ".env">
-    Order allow,deny
-    Deny from all
+    Require all denied
 </Files>
 
 <Files "config.php">
-    Order allow,deny
-    Deny from all
+    Require all denied
 </Files>
 
 # Blloko aksesin direkt tek uploads/

@@ -386,7 +386,7 @@ function getPhotoUrl(?string $photoPath, string $type = 'doctor'): string {
         return BASE_URL . '/' . $photoPath;
     }
     // Placeholder sipas tipit
-    return BASE_URL . '/assets/img/placeholder-' . $type . '.png';
+    return BASE_URL . '/assets/img/placeholder-' . $type . '.svg';
 }
 
 // ---- Paginacion ----

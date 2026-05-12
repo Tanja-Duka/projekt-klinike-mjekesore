@@ -1,72 +1,51 @@
 <?php
 // ============================================================
-// register.php - Regjistrim i pacientit të ri
+// public/register.php
 // ============================================================
 defined('BASE_PATH') or define('BASE_PATH', dirname(__DIR__));
 require_once BASE_PATH . '/config/config.php';
 
-// Nëse tashmë është i loguar → ridrejto
 redirectIfLoggedIn();
 
 $errors = [];
 $data   = [];
 
-// ---- Trajto POST ----
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // 1. Valido CSRF
     verifyCsrfOrDie();
 
-    // 2. Merr dhe pastro të gjitha fushat
     $data = [
-        'name'              => clean($_POST['name']              ?? ''),
-        'email'             => cleanEmail($_POST['email']        ?? ''),
-        'password'          => $_POST['password']                ?? '',
-        'confirm_password'  => $_POST['confirm_password']        ?? '',
-        'phone'             => clean($_POST['phone']             ?? ''),
-        'date_of_birth'     => clean($_POST['date_of_birth']     ?? ''),
-        'blood_type'        => clean($_POST['blood_type']        ?? ''),
-        'address'           => clean($_POST['address']           ?? ''),
-        'emergency_contact' => clean($_POST['emergency_contact'] ?? ''),
+        'name'             => clean($_POST['name']             ?? ''),
+        'email'            => cleanEmail($_POST['email']       ?? ''),
+        'password'         => $_POST['password']               ?? '',
+        'confirm_password' => $_POST['confirm_password']       ?? '',
+        'phone'            => clean($_POST['phone']            ?? ''),
+        'date_of_birth'    => clean($_POST['date_of_birth']    ?? ''),
+        'blood_type'       => clean($_POST['blood_type']       ?? ''),
+        'address'          => clean($_POST['address']          ?? ''),
+        'emergency_contact'=> clean($_POST['emergency_contact']?? ''),
     ];
 
-    // 3. Validim
     if (empty($data['name']) || strlen($data['name']) < 3) {
         $errors['name'] = 'Emri duhet të ketë të paktën 3 karaktere.';
     }
-
     if (!$data['email']) {
         $errors['email'] = 'Ju lutemi vendosni një email të vlefshëm.';
     } elseif (emailExists($data['email'])) {
         $errors['email'] = ERR_EMAIL_EXISTS;
     }
-
     if (!isValidPassword($data['password'])) {
         $errors['password'] = 'Fjalëkalimi duhet të ketë min. 8 karaktere, 1 shkronjë të madhe dhe 1 numër.';
     }
-
     if ($data['password'] !== $data['confirm_password']) {
         $errors['confirm_password'] = ERR_PASSWORDS_MISMATCH;
     }
-
     if (!empty($data['phone']) && !isValidPhone($data['phone'])) {
-        $errors['phone'] = 'Numri i telefonit nuk është i vlefshëm (p.sh. 0691234567).';
+        $errors['phone'] = 'Numri i telefonit nuk është i vlefshëm.';
     }
 
-    if (!empty($data['date_of_birth']) && !isValidDate($data['date_of_birth'])) {
-        $errors['date_of_birth'] = 'Data e lindjes nuk është e vlefshme.';
-    }
-
-    if (!empty($data['blood_type']) && !in_array($data['blood_type'], BLOOD_TYPES)) {
-        $errors['blood_type'] = 'Grupi i gjakut nuk është i vlefshëm.';
-    }
-
-    // 4. Nëse nuk ka gabime → INSERT në DB
     if (empty($errors)) {
         try {
             db()->beginTransaction();
-
-            $passwordHash = password_hash($data['password'], PASSWORD_BCRYPT, ['cost' => 12]);
 
             $userId = db()->insert(
                 "INSERT INTO users
@@ -77,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 [
                     $data['name'],
                     $data['email'],
-                    $passwordHash,
+                    password_hash($data['password'], PASSWORD_BCRYPT, ['cost' => 12]),
                     ROLE_PATIENT,
                     $data['phone']             ?: null,
                     $data['date_of_birth']     ?: null,
@@ -88,10 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
 
             db()->commit();
-
-            // Dërgo email mirëseardhjeje (nuk ndal nëse dështon)
             sendWelcomeEmail($data['email'], $data['name']);
-
             setFlashMessage('success', MSG_REGISTER_SUCCESS);
             redirect(BASE_URL . '/public/login.php');
 
@@ -102,326 +78,150 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+$pageTitle = 'Krijo Llogari — ' . APP_NAME;
+$cssFile   = 'forms.css';
+include BASE_PATH . '/includes/header.php';
+include BASE_PATH . '/includes/navbar.php';
 ?>
-<!DOCTYPE html>
-<html lang="sq">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="<?= getCsrfToken() ?>">
-    <title>Regjistrohu — <?= APP_NAME ?></title>
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/forms.css">
-</head>
-<body class="form-page">
 
-<?php include BASE_PATH . '/includes/navbar.php'; ?>
+<section class="auth-shell">
 
-<main class="form-wrapper">
-    <div class="form-container form-container-lg">
+    <!-- Left: form -->
+    <div class="auth-shell-left">
+        <div class="auth-form-wrap">
+            <div class="eyebrow">Krijo llogari</div>
+            <h1>Bashkohuni në <em class="serif-italic">Vitanova</em>.</h1>
+            <p>Krijimi i llogarisë merr 30 sekonda. Pastaj rezervoni takimin tuaj të parë me dy klikime.</p>
 
-        <div class="form-header">
-            <div class="form-logo">🏥</div>
-            <h1 class="form-title">Krijo Llogarinë</h1>
-            <p class="form-subtitle">Regjistrohu si pacient falas</p>
-        </div>
+            <?php displayFlashMessage(); ?>
+            <?php if (!empty($errors['general'])): ?>
+                <div class="alert alert-error"><?= e($errors['general']) ?></div>
+            <?php endif; ?>
 
-        <?php displayFlashMessage(); ?>
+            <form method="POST" action="<?= BASE_URL ?>/public/register.php" novalidate>
+                <?= csrfInput() ?>
 
-        <?php if (!empty($errors['general'])): ?>
-            <div class="alert alert-error"><?= e($errors['general']) ?></div>
-        <?php endif; ?>
-
-        <form id="registerForm" method="POST" action="register.php" novalidate>
-            <?= csrfInput() ?>
-
-            <!-- Seksioni 1: Informacioni kryesor -->
-            <div class="form-section-title">Informacioni Kryesor</div>
-
-            <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" for="name">Emri i plotë *</label>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        class="form-control <?= !empty($errors['name']) ? 'is-invalid' : '' ?>"
-                        value="<?= e($data['name'] ?? '') ?>"
-                        placeholder="Emri Mbiemri"
-                        required
-                    >
+                    <label class="form-label" for="name">Emri i plotë <span>*</span></label>
+                    <input type="text" id="name" name="name" class="form-control"
+                           value="<?= e($data['name'] ?? '') ?>"
+                           placeholder="Arta Sopa" required>
                     <?php if (!empty($errors['name'])): ?>
                         <div class="form-error"><?= e($errors['name']) ?></div>
                     <?php endif; ?>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="phone">Telefoni</label>
-                    <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        class="form-control <?= !empty($errors['phone']) ? 'is-invalid' : '' ?>"
-                        value="<?= e($data['phone'] ?? '') ?>"
-                        placeholder="0691234567"
-                    >
-                    <?php if (!empty($errors['phone'])): ?>
-                        <div class="form-error"><?= e($errors['phone']) ?></div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="email">
-                    Email *
-                    <span class="email-check-indicator" id="emailIndicator"></span>
-                </label>
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    class="form-control <?= !empty($errors['email']) ? 'is-invalid' : '' ?>"
-                    value="<?= e($data['email'] ?? '') ?>"
-                    placeholder="emri@email.com"
-                    autocomplete="email"
-                    required
-                >
-                <?php if (!empty($errors['email'])): ?>
-                    <div class="form-error"><?= e($errors['email']) ?></div>
-                <?php endif; ?>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label" for="password">Fjalëkalimi *</label>
-                    <div class="input-password-wrap">
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            class="form-control <?= !empty($errors['password']) ? 'is-invalid' : '' ?>"
-                            placeholder="Min. 8 karaktere"
-                            autocomplete="new-password"
-                            required
-                        >
-                        <button type="button" class="toggle-password" data-target="password">
-                            <span class="eye-icon">👁️</span>
-                        </button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email <span>*</span></label>
+                        <input type="email" id="email" name="email" class="form-control"
+                               value="<?= e($data['email'] ?? '') ?>"
+                               placeholder="emri@example.com"
+                               autocomplete="email" required>
+                        <?php if (!empty($errors['email'])): ?>
+                            <div class="form-error"><?= e($errors['email']) ?></div>
+                        <?php endif; ?>
                     </div>
-                    <div class="password-strength" id="passwordStrength"></div>
-                    <?php if (!empty($errors['password'])): ?>
-                        <div class="form-error"><?= e($errors['password']) ?></div>
-                    <?php endif; ?>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label" for="confirm_password">Konfirmo Fjalëkalimin *</label>
-                    <div class="input-password-wrap">
-                        <input
-                            type="password"
-                            id="confirm_password"
-                            name="confirm_password"
-                            class="form-control <?= !empty($errors['confirm_password']) ? 'is-invalid' : '' ?>"
-                            placeholder="Përsërit fjalëkalimin"
-                            autocomplete="new-password"
-                            required
-                        >
-                        <button type="button" class="toggle-password" data-target="confirm_password">
-                            <span class="eye-icon">👁️</span>
-                        </button>
+                    <div class="form-group">
+                        <label class="form-label" for="phone">Telefon</label>
+                        <input type="tel" id="phone" name="phone" class="form-control"
+                               value="<?= e($data['phone'] ?? '') ?>"
+                               placeholder="+383 44 …">
+                        <?php if (!empty($errors['phone'])): ?>
+                            <div class="form-error"><?= e($errors['phone']) ?></div>
+                        <?php endif; ?>
                     </div>
-                    <?php if (!empty($errors['confirm_password'])): ?>
-                        <div class="form-error"><?= e($errors['confirm_password']) ?></div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            <!-- Seksioni 2: Informacioni mjekësor -->
-            <div class="form-section-title">Informacioni Mjekësor <span class="optional">(opsional)</span></div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label" for="date_of_birth">Data e Lindjes</label>
-                    <input
-                        type="date"
-                        id="date_of_birth"
-                        name="date_of_birth"
-                        class="form-control <?= !empty($errors['date_of_birth']) ? 'is-invalid' : '' ?>"
-                        value="<?= e($data['date_of_birth'] ?? '') ?>"
-                        max="<?= date('Y-m-d') ?>"
-                    >
-                    <?php if (!empty($errors['date_of_birth'])): ?>
-                        <div class="form-error"><?= e($errors['date_of_birth']) ?></div>
-                    <?php endif; ?>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label" for="blood_type">Grupi i Gjakut</label>
-                    <select
-                        id="blood_type"
-                        name="blood_type"
-                        class="form-control <?= !empty($errors['blood_type']) ? 'is-invalid' : '' ?>"
-                    >
-                        <option value="">-- Zgjidh --</option>
-                        <?php foreach (BLOOD_TYPES as $bt): ?>
-                            <option value="<?= $bt ?>" <?= ($data['blood_type'] ?? '') === $bt ? 'selected' : '' ?>>
-                                <?= $bt ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <?php if (!empty($errors['blood_type'])): ?>
-                        <div class="form-error"><?= e($errors['blood_type']) ?></div>
-                    <?php endif; ?>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="password">Fjalëkalimi <span>*</span></label>
+                        <input type="password" id="password" name="password" class="form-control"
+                               placeholder="Min. 8 karaktere"
+                               autocomplete="new-password" required>
+                        <?php if (!empty($errors['password'])): ?>
+                            <div class="form-error"><?= e($errors['password']) ?></div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="confirm_password">Konfirmo <span>*</span></label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control"
+                               placeholder="••••••••"
+                               autocomplete="new-password" required>
+                        <?php if (!empty($errors['confirm_password'])): ?>
+                            <div class="form-error"><?= e($errors['confirm_password']) ?></div>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label class="form-label" for="address">Adresa</label>
-                <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    class="form-control"
-                    value="<?= e($data['address'] ?? '') ?>"
-                    placeholder="Rruga, Qyteti"
-                >
-            </div>
+                <p class="form-hint mb-16">
+                    Duke krijuar llogari pranoni
+                    <a href="#" style="color:var(--accent);">Kushtet e Përdorimit</a> dhe
+                    <a href="#" style="color:var(--accent);">Politikën e Privatësisë</a>.
+                </p>
 
-            <div class="form-group">
-                <label class="form-label" for="emergency_contact">Kontakti i Urgjencës</label>
-                <input
-                    type="text"
-                    id="emergency_contact"
-                    name="emergency_contact"
-                    class="form-control"
-                    value="<?= e($data['emergency_contact'] ?? '') ?>"
-                    placeholder="Emri dhe numri i telefonit"
-                >
-            </div>
+                <button class="btn btn-cta w-100" type="submit">Krijo llogari →</button>
 
-            <button type="submit" class="btn btn-primary btn-block" id="registerBtn">
-                Krijo Llogarinë
-            </button>
-        </form>
+                <div class="or-rule">ose</div>
 
-        <!-- Ndarës -->
-        <div class="form-divider"><span>ose</span></div>
+                <a href="<?= BASE_URL ?>/api/google_callback.php?action=register" class="btn btn-google">
+                    <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+                        <path fill="#4285F4" d="M22 12c0-.7-.1-1.4-.2-2H12v3.8h5.6c-.2 1.3-1 2.4-2 3.1v2.6h3.3c1.9-1.8 3.1-4.4 3.1-7.5z"/>
+                        <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.3-2.6c-.9.6-2 .9-3.3.9-2.5 0-4.7-1.7-5.4-4H3.2v2.6C4.9 19.7 8.2 22 12 22z"/>
+                        <path fill="#FBBC05" d="M6.6 13.9c-.2-.6-.3-1.2-.3-1.9s.1-1.3.3-1.9V7.5H3.2C2.4 8.9 2 10.4 2 12s.4 3.1 1.2 4.5l3.4-2.6z"/>
+                        <path fill="#EA4335" d="M12 6.4c1.4 0 2.7.5 3.7 1.4l2.8-2.8C16.9 3.4 14.7 2.4 12 2.4 8.2 2.4 4.9 4.7 3.2 7.5l3.4 2.6c.7-2.3 2.9-3.7 5.4-3.7z"/>
+                    </svg>
+                    Regjistrohu me Google
+                </a>
+            </form>
 
-        <!-- Google Register -->
-        <a href="<?= BASE_URL ?>/api/google_callback.php?action=register" class="btn btn-google btn-block">
-            <img src="<?= BASE_URL ?>/assets/img/google-icon.svg" alt="Google" width="20">
-            Regjistrohu me Google
-        </a>
-
-        <p class="form-footer-text">
-            Keni llogari tashmë?
-            <a href="login.php">Hyr këtu</a>
-        </p>
-
+            <p class="auth-foot">Keni llogari? <a href="<?= BASE_URL ?>/public/login.php">Hyni këtu →</a></p>
+        </div>
     </div>
-</main>
+
+    <!-- Right: feature list -->
+    <div class="auth-shell-right">
+        <div class="auth-quote">
+            <span class="mark">"</span>
+            <h2>Çfarë merrni me llogari falas?</h2>
+            <ul style="margin-top:24px;display:flex;flex-direction:column;gap:14px;">
+                <li style="display:flex;gap:12px;color:var(--ink-2);">
+                    <span style="color:var(--accent);font-family:var(--serif);font-style:italic;">01.</span>
+                    Rezervim online 24/7 me specialistë
+                </li>
+                <li style="display:flex;gap:12px;color:var(--ink-2);">
+                    <span style="color:var(--accent);font-family:var(--serif);font-style:italic;">02.</span>
+                    Receta dixhitale të aksesueshme nga telefoni
+                </li>
+                <li style="display:flex;gap:12px;color:var(--ink-2);">
+                    <span style="color:var(--accent);font-family:var(--serif);font-style:italic;">03.</span>
+                    Historik i plotë mjekësor në një vend
+                </li>
+                <li style="display:flex;gap:12px;color:var(--ink-2);">
+                    <span style="color:var(--accent);font-family:var(--serif);font-style:italic;">04.</span>
+                    Kujtues me email para çdo takimi
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</section>
+
+<?php include BASE_PATH . '/includes/footer.php'; ?>
 
 <script src="<?= BASE_URL ?>/assets/js/validate.js"></script>
 <script>
-// ---- Toggle fjalëkalimit ----
-document.querySelectorAll('.toggle-password').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const input = document.getElementById(this.dataset.target);
-        input.type = input.type === 'password' ? 'text' : 'password';
-        this.querySelector('.eye-icon').textContent = input.type === 'password' ? '👁️' : '🙈';
-    });
-});
-
-// ---- Password strength indicator ----
 document.getElementById('password').addEventListener('input', function () {
     const val = this.value;
-    const indicator = document.getElementById('passwordStrength');
-    let strength = 0;
-    let label = '';
-    let cls = '';
-
-    if (val.length >= 8) strength++;
-    if (/[A-Z]/.test(val)) strength++;
-    if (/[0-9]/.test(val)) strength++;
-    if (/[^a-zA-Z0-9]/.test(val)) strength++;
-
-    if (val.length === 0) { indicator.innerHTML = ''; return; }
-
-    switch (strength) {
-        case 1: label = 'Shumë i dobët'; cls = 'strength-weak'; break;
-        case 2: label = 'I dobët';        cls = 'strength-fair'; break;
-        case 3: label = 'I mirë';         cls = 'strength-good'; break;
-        case 4: label = 'Shumë i fortë';  cls = 'strength-strong'; break;
-    }
-    indicator.innerHTML = `<span class="${cls}">${label}</span>`;
-});
-
-// ---- AJAX check email ----
-let emailTimeout;
-document.getElementById('email').addEventListener('input', function () {
-    clearTimeout(emailTimeout);
-    const email = this.value.trim();
-    const indicator = document.getElementById('emailIndicator');
-
-    if (!validateEmail(email)) { indicator.innerHTML = ''; return; }
-
-    emailTimeout = setTimeout(() => {
-        fetch('<?= BASE_URL ?>/api/check_email.php?email=' + encodeURIComponent(email), {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.exists) {
-                indicator.innerHTML = '<span class="email-taken">✗ Email i zënë</span>';
-                showError(document.getElementById('email'), ERR_EMAIL_EXISTS || 'Ky email është i regjistruar.');
-            } else {
-                indicator.innerHTML = '<span class="email-free">✓ Email i disponueshëm</span>';
-                clearError(document.getElementById('email'));
-            }
-        })
-        .catch(() => { indicator.innerHTML = ''; });
-    }, 400);
-});
-
-// ---- Validim frontend i formës ----
-document.getElementById('registerForm').addEventListener('submit', function (e) {
-    let valid = true;
-    clearAllErrors(this);
-
-    const name    = document.getElementById('name');
-    const email   = document.getElementById('email');
-    const pass    = document.getElementById('password');
-    const confirm = document.getElementById('confirm_password');
-
-    if (!name.value.trim() || name.value.trim().length < 3) {
-        showError(name, 'Emri duhet të ketë të paktën 3 karaktere.');
-        valid = false;
-    }
-
-    if (!validateEmail(email.value.trim())) {
-        showError(email, 'Ju lutemi vendosni një email të vlefshëm.');
-        valid = false;
-    }
-
-    if (!validatePassword(pass.value)) {
-        showError(pass, 'Min. 8 karaktere, 1 shkronjë e madhe, 1 numër.');
-        valid = false;
-    }
-
-    if (pass.value !== confirm.value) {
-        showError(confirm, 'Fjalëkalimet nuk përputhen.');
-        valid = false;
-    }
-
-    if (!valid) {
-        e.preventDefault();
-        return;
-    }
-
-    const btn = document.getElementById('registerBtn');
-    btn.textContent = 'Duke krijuar llogarinë...';
-    btn.disabled = true;
+    let hint = '';
+    if (val.length > 0 && val.length < 8) hint = 'Shumë i shkurtër';
+    else if (val.length >= 8 && !/[A-Z]/.test(val)) hint = 'Shto një shkronjë të madhe';
+    else if (val.length >= 8 && !/[0-9]/.test(val)) hint = 'Shto një numër';
+    const el = this.nextElementSibling;
+    if (el && el.classList.contains('form-error')) return;
+    let tip = document.getElementById('pwTip');
+    if (!tip) { tip = document.createElement('div'); tip.id = 'pwTip'; tip.className = 'form-hint'; this.parentNode.appendChild(tip); }
+    tip.textContent = hint;
 });
 </script>
-</body>
-</html>

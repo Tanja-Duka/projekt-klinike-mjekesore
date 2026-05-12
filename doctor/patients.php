@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-// doctor/patients.php - Historia e pacientëve
+// doctor/patients.php
 // ============================================================
 
 require_once dirname(__DIR__) . '/config/config.php';
@@ -9,8 +9,7 @@ requireRole(ROLE_DOCTOR);
 
 $doctorId = getCurrentUserId();
 
-// Nëse klikohet mbi pacient → shfaq historinë e tij
-$viewPatientId = cleanInt($_GET['patient_id'] ?? 0);
+$viewPatientId  = cleanInt($_GET['patient_id'] ?? 0);
 $patientHistory = [];
 $selectedPatient = null;
 
@@ -30,46 +29,73 @@ if ($viewPatientId > 0) {
     }
 }
 
-// Lista e pacientëve unikë (me vizitën e fundit)
 $patients = db()->fetchAll(
     "SELECT u.id, u.name, u.email, u.phone, u.blood_type,
+            u.date_of_birth,
             MAX(a.appointment_date) AS last_visit,
-            COUNT(a.id) AS total_visits
+            MIN(CASE WHEN a.status IN (?,?) AND a.appointment_date >= CURDATE() THEN a.appointment_date END) AS next_visit,
+            COUNT(a.id) AS total_visits,
+            SUM(CASE WHEN a.status IN (?,?) AND a.appointment_date >= CURDATE() THEN 1 ELSE 0 END) AS active_count
      FROM appointments a
      JOIN users u ON a.patient_id = u.id
      WHERE a.doctor_id = ?
-     GROUP BY u.id, u.name, u.email, u.phone, u.blood_type
+     GROUP BY u.id, u.name, u.email, u.phone, u.blood_type, u.date_of_birth
      ORDER BY last_visit DESC",
-    [$doctorId]
+    [STATUS_PENDING, STATUS_CONFIRMED, STATUS_PENDING, STATUS_CONFIRMED, $doctorId]
 );
 
+$totalPatients  = count($patients);
+$activePatients = count(array_filter($patients, fn($p) => $p['active_count'] > 0));
+$newThisMonth   = count(array_filter($patients, fn($p) =>
+    $p['last_visit'] && substr($p['last_visit'], 0, 7) === date('Y-m')
+));
 
-
-
-$pageTitle  = 'Pacientët e Mi';
-$cssFile    = 'dashboard.css';
+$pageTitle = 'Pacientët e Mi — ' . APP_NAME;
+$cssFile   = 'dashboard.css';
+$extraCss  = ['forms.css'];
 include BASE_PATH . '/includes/header.php';
+include BASE_PATH . '/includes/navbar.php';
 ?>
+
 <div class="dashboard-wrapper">
 <?php $sidebarRole = 'doctor'; include BASE_PATH . '/includes/sidebar.php'; ?>
+
 <main class="main-content">
+
+    <?php if ($selectedPatient): ?>
+
+    <!-- Patient history view -->
     <div class="content-header">
-        <h1>Pacientët e Mi</h1>
+        <div>
+            <div class="eyebrow">Historia e pacientit</div>
+            <h1><?= e($selectedPatient['name']) ?> <em class="serif-italic">— vizitat</em>.</h1>
+            <p style="color:var(--ink-2);margin-top:6px;">
+                <?= e($selectedPatient['email']) ?>
+                <?php if (!empty($selectedPatient['phone'])): ?> · <?= e($selectedPatient['phone']) ?><?php endif; ?>
+            </p>
+        </div>
+        <a href="<?= BASE_URL ?>/doctor/patients.php" class="btn btn-outline btn-sm">← Kthehu</a>
     </div>
 
-    <?php if ($selectedPatient && !empty($patientHistory)): ?>
-    <!-- Histori e pacientit -->
-    <div class="mb-16">
-        <a href="<?= BASE_URL ?>/doctor/patients.php" class="btn btn-outline btn-sm">&#8592; Kthehu</a>
-    </div>
-    <div class="dashboard-form">
-        <h3><?= e($selectedPatient['name']) ?> — Historia e Vizitave</h3>
-        <p class="text-muted">Email: <?= e($selectedPatient['email']) ?> · Tel: <?= e($selectedPatient['phone'] ?? '—') ?></p>
-    </div>
+    <?php displayFlashMessage(); ?>
+
     <div class="data-section">
-        <div class="table-wrap">
+        <?php if (empty($patientHistory)): ?>
+            <div class="empty-state">
+                <h3>Nuk ka historik vizitash</h3>
+            </div>
+        <?php else: ?>
+        <div class="data-section-body" style="padding:0;">
             <table class="data-table">
-                <thead><tr><th>Data</th><th>Ora</th><th>Shërbimi</th><th>Statusi</th><th>Recetë</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Ora</th>
+                        <th>Shërbimi</th>
+                        <th>Statusi</th>
+                        <th>Recetë</th>
+                    </tr>
+                </thead>
                 <tbody>
                 <?php foreach ($patientHistory as $h): ?>
                 <tr>
@@ -82,9 +108,9 @@ include BASE_PATH . '/includes/header.php';
                             <span class="status-badge status-completed">Ka recetë</span>
                         <?php elseif ($h['status'] === STATUS_COMPLETED): ?>
                             <a href="<?= BASE_URL ?>/doctor/upload_rx.php?appointment_id=<?= (int)$h['id'] ?>"
-                               class="btn btn-primary btn-sm">+ Ngarko</a>
+                               class="btn btn-outline btn-sm">+ Ngarko</a>
                         <?php else: ?>
-                            <span class="text-muted">—</span>
+                            <span style="color:var(--ink-3)">—</span>
                         <?php endif; ?>
                     </td>
                 </tr>
@@ -92,34 +118,84 @@ include BASE_PATH . '/includes/header.php';
                 </tbody>
             </table>
         </div>
+        <?php endif; ?>
     </div>
 
     <?php else: ?>
-    <!-- Lista e pacientëve -->
+
+    <!-- Patient list view -->
+    <div class="content-header">
+        <div>
+            <div class="eyebrow">Baza ime</div>
+            <h1><?= $totalPatients ?> <em class="serif-italic">pacientë</em>.</h1>
+            <p style="color:var(--ink-2);margin-top:6px;"><?= $newThisMonth ?> të rinj këtë muaj · <?= $activePatients ?> me takime aktive.</p>
+        </div>
+        <div style="position:relative;min-width:260px;">
+            <input class="form-control" id="patientSearch" placeholder="Kërko sipas emrit ose telefonit…">
+        </div>
+    </div>
+
+    <?php displayFlashMessage(); ?>
+
+    <div class="filter-bar">
+        <a href="?filter=all"    class="filter-chip <?= ($_GET['filter'] ?? 'all') === 'all'    ? 'active' : '' ?>">Të gjithë <span><?= $totalPatients ?></span></a>
+        <a href="?filter=active" class="filter-chip <?= ($_GET['filter'] ?? '') === 'active' ? 'active' : '' ?>">Aktive <span><?= $activePatients ?></span></a>
+        <a href="?filter=new"    class="filter-chip <?= ($_GET['filter'] ?? '') === 'new'    ? 'active' : '' ?>">Të rinj <span><?= $newThisMonth ?></span></a>
+    </div>
+
     <?php if (empty($patients)): ?>
         <div class="empty-state">
-            <div class="empty-state-icon">&#128101;</div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" width="40" height="40" style="opacity:.35"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
             <h3>Nuk keni pacientë ende</h3>
         </div>
     <?php else: ?>
     <div class="data-section">
-        <div class="table-wrap">
-            <table class="data-table">
-                <thead><tr><th>Pacienti</th><th>Telefon</th><th>Grupi i Gjakut</th><th>Vizita Gjithsej</th><th>Vizita e Fundit</th><th></th></tr></thead>
+        <div class="data-section-body" style="padding:0;">
+            <table class="data-table" id="patientTable">
+                <thead>
+                    <tr>
+                        <th>Pacienti</th>
+                        <th>Mosha</th>
+                        <th>Vizita e fundit</th>
+                        <th>Tjetra</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
                 <tbody>
-                <?php foreach ($patients as $p): ?>
-                <tr>
+                <?php foreach ($patients as $p):
+                    $age = $p['date_of_birth']
+                        ? (int)((time() - strtotime($p['date_of_birth'])) / 31536000)
+                        : null;
+                    $isActive = $p['active_count'] > 0;
+                    $isNew    = $p['last_visit'] && substr($p['last_visit'], 0, 7) === date('Y-m');
+                    $filter   = $_GET['filter'] ?? 'all';
+                    if ($filter === 'active' && !$isActive) continue;
+                    if ($filter === 'new'    && !$isNew) continue;
+                ?>
+                <tr class="patient-row">
                     <td>
-                        <strong><?= e($p['name']) ?></strong><br>
-                        <small class="text-muted"><?= e($p['email']) ?></small>
+                        <div class="pname">
+                            <span class="av"><?= mb_strtoupper(mb_substr($p['name'], 0, 1)) ?></span>
+                            <div>
+                                <strong><?= e($p['name']) ?></strong>
+                                <span class="em"><?= e($p['phone'] ?? $p['email']) ?></span>
+                            </div>
+                        </div>
                     </td>
-                    <td><?= e($p['phone'] ?? '—') ?></td>
-                    <td><?= e($p['blood_type'] ?? '—') ?></td>
-                    <td><?= (int)$p['total_visits'] ?></td>
-                    <td><?= formatDateSq($p['last_visit']) ?></td>
+                    <td><?= $age ?? '—' ?></td>
+                    <td><?= $p['last_visit'] ? formatDateSq($p['last_visit']) : '—' ?></td>
+                    <td><?= $p['next_visit'] ? formatDateSq($p['next_visit']) : '—' ?></td>
                     <td>
-                        <a href="?patient_id=<?= (int)$p['id'] ?>" class="btn btn-outline btn-sm">Historia</a>
+                        <?php if ($isNew): ?>
+                            <span class="status-badge status-pending">e re</span>
+                        <?php elseif ($isActive): ?>
+                            <span class="status-badge status-confirmed">aktive</span>
+                        <?php else: ?>
+                            <span class="status-badge status-completed">joaktive</span>
+                        <?php endif; ?>
                     </td>
+                    <td><a href="?patient_id=<?= (int)$p['id'] ?>" class="btn btn-ghost btn-sm">Hap →</a></td>
                 </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -127,8 +203,22 @@ include BASE_PATH . '/includes/header.php';
         </div>
     </div>
     <?php endif; ?>
+
     <?php endif; ?>
+
 </main>
 </div>
-<?php include BASE_PATH . '/includes/footer.php';
 
+<?php include BASE_PATH . '/includes/footer.php'; ?>
+
+<script>
+const s = document.getElementById('patientSearch');
+if (s) {
+    s.addEventListener('input', () => {
+        const q = s.value.toLowerCase();
+        document.querySelectorAll('#patientTable .patient-row').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+    });
+}
+</script>

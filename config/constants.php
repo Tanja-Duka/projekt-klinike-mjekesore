@@ -29,7 +29,7 @@ define('RECORDS_PER_PAGE', 20);
 // ---- Ridrejtimet sipas rolit ----
 define('REDIRECT_PATIENT', BASE_URL . '/patient/dashboard.php');
 define('REDIRECT_DOCTOR',  BASE_URL . '/doctor/dashboard.php');
-define('REDIRECT_ADMIN',   BASE_URL . '/admin/dashboard.php');
+define('REDIRECT_ADMIN',   BASE_URL . '/doctor/admin/dashboard.php');
 define('REDIRECT_LOGIN',   BASE_URL . '/public/login.php');
 define('REDIRECT_HOME',    BASE_URL . '/public/home.php');
 

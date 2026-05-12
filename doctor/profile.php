@@ -85,7 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $specializations = SPECIALIZATIONS;
-$specializations = SPECIALIZATIONS;
 $pageTitle       = 'Profili Im';
 $cssFile         = 'dashboard.css';
 include BASE_PATH . '/includes/header.php';
@@ -155,5 +154,3 @@ include BASE_PATH . '/includes/header.php';
 </main>
 </div>
 <?php include BASE_PATH . '/includes/footer.php';
-
-

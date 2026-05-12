@@ -11,4 +11,3 @@ if (isLoggedIn()) {
 }
 
 redirect(BASE_URL . '/public/home.php');
-

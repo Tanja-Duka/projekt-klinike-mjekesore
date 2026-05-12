@@ -1,91 +1,94 @@
 <?php
-// Mos include header/navbar sërish — janë bërë sipër
-include BASE_PATH . '/includes/footer.php';
-// Mos ekzekuto kodi tjetër
-exit;
+// ============================================================
+// public/about.php
+// ============================================================
+require_once dirname(__DIR__) . '/config/config.php';
 
+$stats = [
+    'doctors'    => db()->fetchOne("SELECT COUNT(*) as c FROM users WHERE role=? AND is_active=1", [ROLE_DOCTOR])['c'],
+    'patients'   => db()->fetchOne("SELECT COUNT(*) as c FROM users WHERE role=? AND is_active=1", [ROLE_PATIENT])['c'],
+    'experience' => 15,
+];
 
-$pageTitle = 'Rreth Nesh';
+$reserveUrl = (isLoggedIn() && hasRole(ROLE_PATIENT))
+    ? BASE_URL . '/patient/reserve.php'
+    : BASE_URL . '/public/register.php';
+
+$pageTitle = 'Rreth Nesh — ' . APP_NAME;
 $cssFile   = 'home.css';
 include BASE_PATH . '/includes/header.php';
 include BASE_PATH . '/includes/navbar.php';
 ?>
 
-<div class="page-header">
+<!-- Page header -->
+<section class="page-header">
     <div class="container">
-        <h1>Rreth Nesh</h1>
-        <p>Misioni ynë është të ofrojmë kujdes shëndetësor të cilësisë së lartë për të gjithë</p>
+        <div class="eyebrow">Rreth nesh — Që nga 2008</div>
+        <h1>Një klinikë <em>e ndërtuar mbi besim</em>.</h1>
+        <p>Vitanova nisi në një kat të vetëm me tre mjekë. Sot, jemi specialistë nën të njëjtin parim: kujdes me kohën e duhur, për çdo pacient.</p>
     </div>
-</div>
+</section>
 
-<section class="section" style="background:#fff;">
+<section class="section">
     <div class="container">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;">
+
+        <!-- Historia -->
+        <div class="about-grid">
             <div>
-                <h2>Historia jonë</h2>
-                <p>Vitanova Clinic u themelua me misionin për të ofruar kujdes shëndetësor të përshtatshëm, cilësor dhe të aksesueshëm për të gjithë. Klinika jonë bashkon specialistë të fushave të ndryshme mjekësore nën një çati, duke ofruar shërbime gjithëpërfshirëse.</p>
-                <p>Me ekip të dedikuar mjekësh dhe infermierësh, ne punojmë çdo ditë për të përmirësuar shëndetin dhe cilësinë e jetës së pacientëve tanë.</p>
-                <div class="hero-divider mt-16 mb-16"></div>
-                <h3>Misioni ynë</h3>
-                <p>Të ofrojmë kujdes shëndetësor me cilësi të lartë, me respekt dhe integritet, duke vënë pacientin në qendër të çdo vendimi.</p>
+                <div class="eyebrow mb-16">Historia</div>
+                <h2 class="mb-24" style="font-size:2rem;">
+                    Filluam si tre mjekë <em class="serif-italic">që donin më shumë kohë</em> me pacientët.
+                </h2>
+                <p>Në vitin 2008, themelueset hapën një praktikë të vogël në qendër të Prishtinës me një ide të thjeshtë: takimet duhet të zgjasin sa duhen — jo sa lejon orari.</p>
+                <p style="margin-top:16px;">Sot kemi tre kate, 23 specialitete dhe një laborator të integruar — por filozofia është e njëjta. Çdo pacient takohet pa nxitim, dëgjohet plotësisht dhe ndiqet derisa të kthehet në formë.</p>
+                <p style="margin-top:16px;">Besojmë se mjekësia më e mirë vjen nga marrëdhënia e gjatë mjek–pacient. Prandaj 8 nga 10 pacientë tanë vijnë rregullisht, ndërsa 6 nga 10 na rekomandojnë familjarëve.</p>
             </div>
-            <div class="about-stats">
-                <div class="about-stat">
-                    <span class="about-stat-number">15+</span>
-                    <p>Vite Eksperiencë</p>
-                </div>
-                <div class="about-stat">
-                    <span class="about-stat-number"><?= (int)$stats['doctors'] ?>+</span>
-                    <p>Mjekë Specialistë</p>
-                </div>
-                <div class="about-stat">
-                    <span class="about-stat-number"><?= (int)$stats['patients'] ?>+</span>
-                    <p>Pacientë të Trajtuar</p>
-                </div>
+            <div class="about-image">[ Foto e klinikës ]</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="about-stats">
+            <div class="about-stat">
+                <span class="num"><?= (int)$stats['experience'] ?><em>+</em></span>
+                <span class="label">Vjet eksperiencë</span>
             </div>
+            <div class="about-stat">
+                <span class="num"><?= (int)$stats['doctors'] ?><em>+</em></span>
+                <span class="label">Mjekë specialistë</span>
+            </div>
+            <div class="about-stat">
+                <span class="num"><?= (int)$stats['patients'] ?><em>+</em></span>
+                <span class="label">Pacientë të kujdesur</span>
+            </div>
+        </div>
+
+        <!-- Vlerat -->
+        <div class="about-grid">
+            <div class="about-image">[ Foto e ekipit ]</div>
+            <div>
+                <div class="eyebrow mb-16">Vlerat</div>
+                <h2 class="mb-24" style="font-size:2rem;">
+                    Çfarë na <em class="serif-italic">përkufizon</em>.
+                </h2>
+                <p><strong>Pacienti i parë.</strong> Çdo vendim klinik fillon nga pyetja: çfarë është më e mirë për këtë person, sot?</p>
+                <p style="margin-top:14px;"><strong>Transparencë.</strong> Çmime të qarta. Vendime të shpjeguara. Asnjë surprizë në fund të vizitës.</p>
+                <p style="margin-top:14px;"><strong>Vazhdimësi.</strong> Sistemi ynë dixhital ruan historikun, kështu që ju nuk e tregoni dy herë të njëjtin tregim.</p>
+                <p style="margin-top:14px;"><strong>Kujdes i kohës së duhur.</strong> Takim 30+ minuta për konsulta të para. Takim sot nëse është urgjente.</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Bashkohuni me familjet që <em>na besojnë shëndetin</em>.</h2>
+        <div class="cta-actions">
+            <a href="<?= $reserveUrl ?>" class="btn btn-cta btn-lg">Rezervo Takim</a>
+            <a href="<?= BASE_URL ?>/public/contact.php" class="btn btn-outline btn-lg">Vizitoni klinikën</a>
         </div>
     </div>
 </section>
 
-<!-- Vlerat -->
-<section class="values-banner">
-    <div class="container values-grid">
-        <div class="value-item">
-            <div class="value-icon">&#10084;</div>
-            <div class="value-text">
-                <h4>Kujdes me Zemër</h4>
-                <p>Çdo pacient trajtohet me vëmendje, respekt dhe profesionalizëm.</p>
-            </div>
-        </div>
-        <div class="value-item">
-            <div class="value-icon">&#127891;</div>
-            <div class="value-text">
-                <h4>Ekspertizë e Lartë</h4>
-                <p>Mjekë të certifikuar me trajnime ndërkombëtare dhe eksperiencë të gjerë.</p>
-            </div>
-        </div>
-        <div class="value-item">
-            <div class="value-icon">&#128269;</div>
-            <div class="value-text">
-                <h4>Teknologji Moderne</h4>
-                <p>Pajisje diagnostike dhe mjekësore të nivelit të lartë.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Teknologjitë e përdorura (seksion akademik) -->
-<section class="section" style="background:#fff;">
-    <div class="container text-center">
-        <h2>Teknologjitë e Projektit</h2>
-        <p class="section-subtitle">Sistemi u ndërtua me teknologji moderne web</p>
-        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:20px;margin-top:32px;">
-            <?php foreach (['PHP 8', 'MySQL', 'PDO', 'jQuery', 'HTML5', 'CSS3', 'PHPMailer', 'Google OAuth'] as $tech): ?>
-            <span style="background:rgba(30,107,114,0.08);color:var(--color-primary);padding:8px 20px;border-radius:20px;font-weight:600;font-size:0.9rem;">
-                <?= e($tech) ?>
-            </span>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
-
+<?php include BASE_PATH . '/includes/footer.php'; ?>

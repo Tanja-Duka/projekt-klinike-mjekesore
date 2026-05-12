@@ -1,21 +1,48 @@
+<?php
+// ============================================================
+// public/doctors.php
+// ============================================================
+defined('BASE_PATH') or define('BASE_PATH', dirname(__DIR__));
+require_once BASE_PATH . '/config/config.php';
+
+$filterSpec = clean($_GET['specialization'] ?? '');
+
+if (!empty($filterSpec)) {
+    $doctors = getDoctorsBySpecialization($filterSpec);
+} else {
+    $doctors = getAllDoctors();
+}
+
+$specializations = db()->fetchAll(
+    "SELECT DISTINCT specialization FROM users
+     WHERE role = 'doctor' AND is_active = 1 AND specialization IS NOT NULL
+     ORDER BY specialization ASC"
+);
+
+$reserveBaseUrl = (isLoggedIn() && hasRole(ROLE_PATIENT))
+    ? BASE_URL . '/patient/reserve.php'
+    : BASE_URL . '/public/register.php';
+
 $pageTitle = 'Mjekët Tanë — ' . APP_NAME;
 $cssFile   = 'home.css';
 include BASE_PATH . '/includes/header.php';
 include BASE_PATH . '/includes/navbar.php';
 ?>
 
-<div class="page-header">
+<!-- Page header -->
+<section class="page-header">
     <div class="container">
-        <h1>Mjekët Tanë</h1>
-        <p>Ekip i kualifikuar specialistësh shëndetësorë në shërbimin tuaj</p>
+        <div class="eyebrow">Ekipi — Mjekët tanë</div>
+        <h1>Specialistë <em>të kujdesshëm</em>.</h1>
+        <p>Çdo mjek në Vitanova vjen me përvojë të dëshmuar dhe me një filozofi të përbashkët: koha e duhur për çdo pacient.</p>
     </div>
-</div>
+</section>
 
 <section class="section-sm">
     <div class="container">
         <?php displayFlashMessage(); ?>
 
-        <!-- Filter sipas specializimit -->
+        <!-- Filter tabs -->
         <div class="filter-tabs mb-24">
             <a href="<?= BASE_URL ?>/public/doctors.php"
                class="filter-tab <?= empty($filterSpec) ? 'active' : '' ?>">Të gjithë</a>
@@ -38,22 +65,27 @@ include BASE_PATH . '/includes/navbar.php';
         <div class="doctors-grid">
             <?php foreach ($doctors as $doctor): ?>
             <div class="doctor-card">
-                <?php if (!empty($doctor['photo_path'])): ?>
-                    <img src="<?= BASE_URL . '/' . e($doctor['photo_path']) ?>"
-                         alt="<?= e($doctor['name']) ?>" class="doctor-photo">
-                <?php else: ?>
-                    <div class="doctor-initials"><?= e(getInitials($doctor['name'])) ?></div>
-                <?php endif; ?>
-
+                <div class="doctor-photo-wrap">
+                    <?php if (!empty($doctor['photo_path']) && file_exists(BASE_PATH . '/' . $doctor['photo_path'])): ?>
+                        <img src="<?= BASE_URL . '/' . e($doctor['photo_path']) ?>"
+                             alt="<?= e($doctor['name']) ?>" class="doctor-photo">
+                    <?php else: ?>
+                        <div class="placeholder"><?= e(getInitials($doctor['name'])) ?></div>
+                    <?php endif; ?>
+                    <span class="spec-tag"><?= e($doctor['specialization'] ?? '') ?></span>
+                </div>
                 <h3><?= e($doctor['name']) ?></h3>
                 <p class="doctor-spec"><?= e($doctor['specialization'] ?? '') ?></p>
                 <?php if (!empty($doctor['bio'])): ?>
-                    <p style="font-size:0.84rem;margin-bottom:12px;"><?= e(mb_substr($doctor['bio'], 0, 80)) ?>...</p>
+                    <p class="doctor-bio"><?= e(mb_substr($doctor['bio'], 0, 100)) ?>...</p>
                 <?php endif; ?>
-                <p class="doctor-fee">Konsultim: <strong><?= formatPrice((float)$doctor['consultation_fee']) ?></strong></p>
-                <a href="<?= $reserveBaseUrl ?>?doctor_id=<?= (int)$doctor['id'] ?>" class="btn btn-primary btn-sm">
-                    Rezervo Takim
-                </a>
+                <div class="doctor-meta">
+                    <span class="fee">
+                        <em>Konsultim</em><?= formatPrice((float)$doctor['consultation_fee']) ?>
+                    </span>
+                    <a href="<?= $reserveBaseUrl ?>?doctor_id=<?= (int)$doctor['id'] ?>"
+                       class="btn btn-ghost btn-sm">Rezervo &rarr;</a>
+                </div>
             </div>
             <?php endforeach; ?>
         </div>
@@ -61,4 +93,4 @@ include BASE_PATH . '/includes/navbar.php';
     </div>
 </section>
 
-<?php include BASE_PATH . '/includes/footer.php';
+<?php include BASE_PATH . '/includes/footer.php'; ?>

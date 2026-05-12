@@ -147,5 +147,3 @@ include BASE_PATH . '/includes/header.php';
 </main>
 </div>
 <?php include BASE_PATH . '/includes/footer.php';
-
-

@@ -9,7 +9,7 @@ $role       = $user['role'] ?? null;
 
         <!-- Logo -->
         <a href="<?= BASE_URL ?>/public/home.php" class="navbar-logo">
-            <div class="navbar-logo-icon">&#43;</div>
+            <div class="navbar-logo-mark"><em>V</em></div>
             <div class="navbar-logo-text">
                 <strong>Vitanova</strong>
                 <span>Clinic</span>
@@ -80,4 +80,3 @@ $role       = $user['role'] ?? null;
 
     </div>
 </nav>
-

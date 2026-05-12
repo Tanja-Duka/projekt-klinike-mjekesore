@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-// patient/dashboard.php - Paneli kryesor i pacientit
+// patient/dashboard.php
 // ============================================================
 
 require_once dirname(__DIR__) . '/config/config.php';
@@ -9,7 +9,6 @@ requireRole(ROLE_PATIENT);
 
 $patientId = getCurrentUserId();
 
-// Merr takimet e ardhshme (pending + confirmed)
 $upcomingAppointments = db()->fetchAll(
     "SELECT a.*, u.name AS doctor_name, u.specialization, s.name AS service_name, s.price
      FROM appointments a
@@ -22,7 +21,6 @@ $upcomingAppointments = db()->fetchAll(
     [$patientId, STATUS_PENDING, STATUS_CONFIRMED]
 );
 
-// Merr recetat e fundit
 $recentPrescriptions = db()->fetchAll(
     "SELECT pr.*, u.name AS doctor_name, a.appointment_date, s.name AS service_name
      FROM prescriptions pr
@@ -35,7 +33,6 @@ $recentPrescriptions = db()->fetchAll(
     [$patientId]
 );
 
-// Statistika të shpejta
 $stats = [
     'total'     => db()->fetchOne("SELECT COUNT(*) as c FROM appointments WHERE patient_id = ?", [$patientId])['c'],
     'upcoming'  => db()->fetchOne("SELECT COUNT(*) as c FROM appointments WHERE patient_id = ? AND status IN (?,?) AND appointment_date >= CURDATE()", [$patientId, STATUS_PENDING, STATUS_CONFIRMED])['c'],
@@ -43,83 +40,104 @@ $stats = [
     'rx_count'  => db()->fetchOne("SELECT COUNT(*) as c FROM prescriptions WHERE patient_id = ?", [$patientId])['c'],
 ];
 
-
-$pageTitle  = 'Paneli Im';
-$cssFile    = 'dashboard.css';
+$pageTitle = 'Paneli Im — ' . APP_NAME;
+$cssFile   = 'dashboard.css';
 include BASE_PATH . '/includes/header.php';
+include BASE_PATH . '/includes/navbar.php';
 ?>
+
 <div class="dashboard-wrapper">
-<?php
-// Sidebar i pacientit
-$sidebarRole = 'patient';
-include BASE_PATH . '/includes/sidebar.php';
-?>
+<?php $sidebarRole = 'patient'; include BASE_PATH . '/includes/sidebar.php'; ?>
+
 <main class="main-content">
+
     <div class="content-header">
-        <h1>Mirë se erdhe, <?= e(explode(' ', $_SESSION['name'])[0]) ?>!</h1>
-        <a href="<?= BASE_URL ?>/patient/reserve.php" class="btn btn-cta">+ Rezervo Takim të Ri</a>
+        <div>
+            <div class="eyebrow">Paneli i pacientit</div>
+            <h1>Mirë se erdhe, <em class="serif-italic"><?= e(explode(' ', $_SESSION['name'])[0]) ?></em>.</h1>
+            <p style="color:var(--ink-2);margin-top:6px;">Ja një përmbledhje e shpejtë e takimeve dhe recetave tuaja.</p>
+        </div>
+        <a href="<?= BASE_URL ?>/patient/reserve.php" class="btn btn-cta">Rezervo Takim të Ri →</a>
     </div>
 
     <?php displayFlashMessage(); ?>
 
-    <!-- Kartelat statistikore -->
+    <!-- Quick actions -->
+    <div class="quick-actions">
+        <a href="<?= BASE_URL ?>/patient/reserve.php" class="quick-action">
+            <div class="qa-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M12 14v4M10 16h4"/></svg>
+            </div>
+            <div class="qa-text">
+                <h4>Rezervo Takim</h4>
+                <p>Zgjidh mjekun dhe orarin</p>
+            </div>
+        </a>
+        <a href="<?= BASE_URL ?>/patient/appointments.php" class="quick-action">
+            <div class="qa-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+            </div>
+            <div class="qa-text">
+                <h4>Takimet e Mia</h4>
+                <p>Shiko historikun e vizitave</p>
+            </div>
+        </a>
+        <a href="<?= BASE_URL ?>/patient/prescriptions.php" class="quick-action">
+            <div class="qa-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><circle cx="11" cy="14" r="2"/><path d="m13 16 2 2"/></svg>
+            </div>
+            <div class="qa-text">
+                <h4>Recetat e Mia</h4>
+                <p>Shkarko recetat dixhitale</p>
+            </div>
+        </a>
+    </div>
+
+    <!-- Stats -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon">&#128197;</div>
-            <div class="stat-info">
-                <div class="stat-number"><?= (int)$stats['total'] ?></div>
-                <div class="stat-label">Takime Gjithsej</div>
-            </div>
-        </div>
-        <div class="stat-card green">
-            <div class="stat-icon">&#9989;</div>
-            <div class="stat-info">
-                <div class="stat-number"><?= (int)$stats['upcoming'] ?></div>
-                <div class="stat-label">Takime të Ardhshme</div>
-            </div>
-        </div>
-        <div class="stat-card orange">
-            <div class="stat-icon">&#128203;</div>
-            <div class="stat-info">
-                <div class="stat-number"><?= (int)$stats['completed'] ?></div>
-                <div class="stat-label">Vizita të Kryera</div>
-            </div>
+            <div class="stat-number"><?= (int)$stats['total'] ?></div>
+            <div class="stat-label">Takime Gjithsej</div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon">&#128138;</div>
-            <div class="stat-info">
-                <div class="stat-number"><?= (int)$stats['rx_count'] ?></div>
-                <div class="stat-label">Receta</div>
-            </div>
+            <div class="stat-number"><?= (int)$stats['upcoming'] ?></div>
+            <div class="stat-label">Takime të Ardhshme</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><?= (int)$stats['completed'] ?></div>
+            <div class="stat-label">Vizita të Kryera</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number"><?= (int)$stats['rx_count'] ?></div>
+            <div class="stat-label">Receta</div>
         </div>
     </div>
 
-    <!-- Takimet e ardhshme -->
+    <!-- Upcoming appointments -->
     <div class="data-section">
         <div class="data-section-header">
             <h3>Takimet e Ardhshme</h3>
-            <a href="<?= BASE_URL ?>/patient/appointments.php" class="btn btn-outline btn-sm">Shiko të gjitha</a>
+            <a href="<?= BASE_URL ?>/patient/appointments.php" class="btn btn-outline btn-sm">Shiko të gjitha →</a>
         </div>
+
         <?php if (empty($upcomingAppointments)): ?>
             <div class="empty-state">
-                <div class="empty-state-icon">&#128197;</div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" width="40" height="40" style="opacity:.35"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                 <h3>Nuk keni takime të ardhshme</h3>
                 <p>Rezervoni takimin tuaj të parë tani.</p>
-                <a href="<?= BASE_URL ?>/patient/reserve.php" class="btn btn-cta">Rezervo Takim</a>
+                <a href="<?= BASE_URL ?>/patient/reserve.php" class="btn btn-cta" style="margin-top:16px;">Rezervo Takim →</a>
             </div>
         <?php else: ?>
-            <div style="padding:16px;">
-            <?php foreach ($upcomingAppointments as $appt): ?>
-            <?php
-                $dateParts  = explode('-', $appt['appointment_date']);
+            <?php foreach ($upcomingAppointments as $appt):
+                $d = explode('-', $appt['appointment_date']);
                 $monthNames = MONTHS_SQ;
-                $day        = (int)$dateParts[2];
-                $monthName  = $monthNames[(int)$dateParts[1]];
+                $day = (int)$d[2];
+                $mon = mb_substr($monthNames[(int)$d[1]], 0, 3);
             ?>
             <div class="appointment-card status-<?= e($appt['status']) ?>">
                 <div class="appt-date-box">
                     <div class="appt-date-day"><?= $day ?></div>
-                    <div class="appt-date-month"><?= mb_substr($monthName, 0, 3) ?></div>
+                    <div class="appt-date-month"><?= $mon ?></div>
                 </div>
                 <div class="appt-info">
                     <h4><?= e($appt['doctor_name']) ?></h4>
@@ -135,35 +153,39 @@ include BASE_PATH . '/includes/sidebar.php';
                 </div>
             </div>
             <?php endforeach; ?>
-            </div>
         <?php endif; ?>
     </div>
 
-    <!-- Recetat e fundit -->
+    <!-- Recent prescriptions -->
     <?php if (!empty($recentPrescriptions)): ?>
     <div class="data-section">
         <div class="data-section-header">
             <h3>Recetat e Fundit</h3>
-            <a href="<?= BASE_URL ?>/patient/prescriptions.php" class="btn btn-outline btn-sm">Shiko të gjitha</a>
+            <a href="<?= BASE_URL ?>/patient/prescriptions.php" class="btn btn-outline btn-sm">Shiko të gjitha →</a>
         </div>
-        <div style="padding:16px;">
+
         <?php foreach ($recentPrescriptions as $rx): ?>
-        <div class="prescription-card">
-            <div class="rx-icon">&#128138;</div>
-            <div class="rx-info">
+        <div class="appointment-card">
+            <div class="appt-date-box" style="background:var(--bg-sunk);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22" style="color:var(--accent)"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+            </div>
+            <div class="appt-info">
                 <h4><?= e($rx['service_name']) ?></h4>
                 <p>Dr. <?= e($rx['doctor_name']) ?> · <?= formatDateSq($rx['appointment_date']) ?></p>
             </div>
-            <a href="<?= BASE_URL ?>/patient/prescriptions.php?download=<?= (int)$rx['id'] ?>"
-               class="btn btn-primary btn-sm">&#8595; Shkarko</a>
+            <div class="appt-actions">
+                <a href="<?= BASE_URL ?>/patient/prescriptions.php?download=<?= (int)$rx['id'] ?>"
+                   class="btn btn-outline btn-sm">↓ Shkarko</a>
+            </div>
         </div>
         <?php endforeach; ?>
-        </div>
     </div>
     <?php endif; ?>
 
 </main>
 </div>
+
 <?php
 $extraJs = ['reserve.js'];
 include BASE_PATH . '/includes/footer.php';
+?>

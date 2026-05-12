@@ -1,210 +1,253 @@
 /* ============================================================
-   forms.css - Stilet e formave (login, register, profile, etj.)
+   forms.css — Form pages: login, register, reserve, settings
    ============================================================ */
 
-/* ---- Faqe me formë të centruar ---- */
-.form-page {
-    min-height: 100vh;
+/* ---- Auth shell ---- */
+.auth-shell {
+    min-height: calc(100vh - 200px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--bg);
+}
+.auth-shell-left {
+    padding: 80px 64px;
+    border-right: 1px solid var(--line);
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
-    padding: 40px 16px;
-    background: linear-gradient(135deg, var(--color-bg) 0%, #e8f4f5 100%);
 }
-
-.form-container {
-    background: #fff;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-    padding: 40px 44px;
-    width: 100%;
-    max-width: 480px;
-}
-
-.form-container-wide { max-width: 620px; }
-
-/* ---- Koka e formës ---- */
-.form-header { text-align: center; margin-bottom: 32px; }
-
-.form-logo {
-    width: 56px; height: 56px;
-    background: var(--color-primary);
-    border-radius: 14px;
+.auth-shell-right {
+    padding: 80px 64px;
+    background: var(--bg-paper);
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
-    color: #fff;
-    font-size: 1.6rem;
-    margin: 0 auto 16px;
-}
-
-.form-title {
-    font-size: 1.7rem;
-    color: var(--color-text);
-    margin-bottom: 6px;
-}
-.form-subtitle { color: var(--color-text-muted); font-size: 0.95rem; margin: 0; }
-
-/* ---- Grupi i fushës ---- */
-.form-group { margin-bottom: 20px; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-
-.form-label {
-    display: block;
-    font-weight: 600;
-    font-size: 0.88rem;
-    color: var(--color-text);
-    margin-bottom: 6px;
-}
-.form-label span { color: var(--color-danger); }
-
-/* ---- Input, Select, Textarea ---- */
-.form-control {
-    width: 100%;
-    padding: 11px 14px;
-    border: 1.5px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: 0.95rem;
-    font-family: var(--font-main);
-    color: var(--color-text);
-    background: #fff;
-    transition: border-color var(--transition), box-shadow var(--transition);
-    outline: none;
-    appearance: none;
-}
-.form-control:focus {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(30,107,114,0.12);
-}
-.form-control.is-invalid {
-    border-color: var(--color-danger);
-    box-shadow: 0 0 0 3px rgba(217,83,79,0.10);
-}
-.form-control.is-valid {
-    border-color: var(--color-cta);
-    box-shadow: 0 0 0 3px rgba(58,170,110,0.10);
-}
-textarea.form-control { resize: vertical; min-height: 100px; }
-select.form-control { cursor: pointer; }
-
-/* ---- Fusha me ikonë (password toggle) ---- */
-.input-group {
     position: relative;
-    display: flex;
-}
-.input-group .form-control { border-radius: var(--radius-sm); padding-right: 44px; }
-.input-group-btn {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--color-text-muted);
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 4px;
-}
-.input-group-btn:hover { color: var(--color-primary); }
-
-/* ---- Mesazhi i gabimit ---- */
-.form-error {
-    display: none;
-    color: var(--color-danger);
-    font-size: 0.8rem;
-    margin-top: 5px;
-    font-weight: 500;
-}
-.form-error.visible { display: block; }
-
-/* ---- Forcësia e fjalëkalimit ---- */
-.password-strength { margin-top: 8px; }
-.password-strength-bar {
-    height: 4px;
-    border-radius: 2px;
-    background: var(--color-border);
     overflow: hidden;
-    margin-bottom: 4px;
 }
-.password-strength-fill {
-    height: 100%;
-    border-radius: 2px;
-    transition: width 0.3s ease, background 0.3s ease;
-    width: 0%;
-}
-.strength-weak   .password-strength-fill { width: 25%; background: var(--color-danger); }
-.strength-fair   .password-strength-fill { width: 50%; background: var(--color-warning); }
-.strength-good   .password-strength-fill { width: 75%; background: var(--color-secondary); }
-.strength-strong .password-strength-fill { width: 100%; background: var(--color-cta); }
-.password-strength-text { font-size: 0.78rem; color: var(--color-text-muted); }
-
-/* ---- Ndarësi "ose" ---- */
-.form-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 24px 0;
-    color: var(--color-text-muted);
-    font-size: 0.88rem;
-}
-.form-divider::before,
-.form-divider::after {
+.auth-shell-right::before {
     content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--color-border);
+    position: absolute;
+    inset: 0;
+    background:
+        repeating-linear-gradient(135deg,
+            var(--bg-sunk) 0 14px,
+            var(--bg-paper) 14px 28px);
+    opacity: 0.7;
 }
+.auth-shell-right > * { position: relative; z-index: 1; }
 
-/* ---- Footer i formës (link-et) ---- */
-.form-footer {
-    text-align: center;
-    margin-top: 24px;
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
+.auth-quote {
+    max-width: 420px;
+    color: var(--ink);
 }
-.form-footer a { color: var(--color-primary); font-weight: 600; }
-.form-footer a:hover { text-decoration: underline; }
-
-/* ---- Seksioni i informatave mjekësore (register) ---- */
-.form-section-title {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--color-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border-top: 1px solid var(--color-border);
-    padding-top: 20px;
-    margin: 24px 0 16px;
+.auth-quote .mark {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--accent);
+    font-size: 4rem;
+    line-height: 1;
+    margin-bottom: 8px;
+    display: block;
 }
-
-/* ---- Checkbox ---- */
-.form-check {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-.form-check input[type="checkbox"] {
-    width: 18px; height: 18px;
-    accent-color: var(--color-primary);
-    cursor: pointer;
-}
-
-/* ---- Mesazhet gabimi si listë ---- */
-.error-list {
-    background: #fdf0f0;
-    border-left: 4px solid var(--color-danger);
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
+.auth-quote h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 2rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
     margin-bottom: 20px;
 }
-.error-list li { color: var(--color-danger); font-size: 0.9rem; margin-bottom: 4px; }
-.error-list li:last-child { margin-bottom: 0; }
-
-/* ---- Responsive ---- */
-@media (max-width: 520px) {
-    .form-container { padding: 28px 20px; }
-    .form-row { grid-template-columns: 1fr; }
+.auth-quote p { color: var(--ink-2); }
+.auth-quote .signature {
+    margin-top: 28px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
 }
 
+.auth-form-wrap { max-width: 420px; width: 100%; margin: 0 auto; }
+.auth-form-wrap .eyebrow { margin-bottom: 12px; }
+.auth-form-wrap h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 2.4rem;
+    letter-spacing: -0.025em;
+    margin-bottom: 14px;
+}
+.auth-form-wrap > p { color: var(--ink-2); margin-bottom: 32px; }
+.auth-form-wrap .auth-foot {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--ink-2);
+}
+.auth-form-wrap .auth-foot a { color: var(--accent); font-weight: 500; }
+.auth-form-wrap .or-rule {
+    text-align: center;
+    margin: 24px 0;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    position: relative;
+}
+.auth-form-wrap .or-rule::before,
+.auth-form-wrap .or-rule::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: calc(50% - 30px);
+    height: 1px;
+    background: var(--line);
+}
+.auth-form-wrap .or-rule::before { left: 0; }
+.auth-form-wrap .or-rule::after  { right: 0; }
+
+/* ---- Form controls ---- */
+.form-group { margin-bottom: 18px; }
+.form-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+    font-family: var(--sans);
+}
+.form-label span { color: var(--accent); }
+.form-control {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    background: #fff;
+    font-size: 0.95rem;
+    color: var(--ink);
+    font-family: var(--sans);
+    transition: border-color var(--transition);
+}
+.form-control:focus {
+    outline: none;
+    border-color: var(--ink);
+}
+.form-control::placeholder { color: var(--ink-3); }
+textarea.form-control { resize: vertical; min-height: 96px; }
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8580' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+}
+
+.form-error { color: var(--danger); font-size: 0.82rem; margin-top: 6px; }
+.form-hint  { font-size: 0.8rem; color: var(--ink-3); margin-top: 6px; }
+
+/* Form row (split) */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* Time slots (reserve flow) */
+.time-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));
+    gap: 8px;
+}
+.time-slot {
+    padding: 10px 6px;
+    text-align: center;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    background: var(--bg-paper);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+.time-slot:hover { border-color: var(--ink); background: #fff; }
+.time-slot.selected { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.time-slot.unavailable {
+    color: var(--ink-3);
+    background: var(--bg-sunk);
+    cursor: not-allowed;
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+/* Reserve container (in dashboard) */
+.reserve-container {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 32px;
+    align-items: start;
+}
+.reserve-summary {
+    background: var(--bg-paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 28px;
+    position: sticky;
+    top: 96px;
+}
+.reserve-summary h4 { margin-bottom: 18px; font-family: var(--serif); font-weight: 400; font-size: 1.2rem; }
+.reserve-summary .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    font-size: 0.92rem;
+}
+.reserve-summary .row:first-of-type { border-top: 0; }
+.reserve-summary .row .k { color: var(--ink-3); font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.reserve-summary .row .v { color: var(--ink); font-weight: 500; text-align: right; }
+.reserve-summary .total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 14px;
+    margin-top: 10px;
+    border-top: 1px solid var(--ink);
+    font-family: var(--serif);
+    font-size: 1.2rem;
+}
+
+/* Dashboard form panel */
+.dashboard-form {
+    background: var(--bg-paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 36px;
+}
+.dashboard-form h3 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.4rem;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+}
+
+/* ---- Public contact form ---- */
+.contact-form {
+    background: var(--bg-paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 40px;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+    .auth-shell { grid-template-columns: 1fr; min-height: auto; }
+    .auth-shell-right { display: none; }
+    .auth-shell-left { padding: 56px 24px; border-right: 0; }
+    .reserve-container { grid-template-columns: 1fr; }
+    .reserve-summary { position: static; }
+    .form-row { grid-template-columns: 1fr; }
+}

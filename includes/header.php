@@ -24,4 +24,3 @@
     <?php endif; ?>
 </head>
 <body>
-

@@ -1,22 +1,47 @@
-// ============================================================
-// main.js - jQuery init dhe funksione globale
-// ============================================================
+/* ============================================================
+   main.js — small helpers shared across redesigned pages
+   - Mobile nav toggle
+   - Active link highlight (data-page attribute on <body>)
+   - Search dropdown demo
+   ============================================================ */
 
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', () => {
+    // Mobile nav
+    const burger = document.getElementById('navHamburger');
+    const menu   = document.getElementById('navMenu');
+    if (burger && menu) {
+        burger.addEventListener('click', () => menu.classList.toggle('open'));
+    }
 
-    // TODO: Vendos CSRF token si header default për të gjitha AJAX kërkesat
-    // $.ajaxSetup({ headers: { 'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content') } });
+    // Highlight active link based on body[data-page]
+    const page = document.body.dataset.page;
+    if (page) {
+        document.querySelectorAll(`[data-link="${page}"]`).forEach(a => a.classList.add('active'));
+    }
 
-    // TODO: Flash messages auto-hide pas 4 sekondash
-    // setTimeout(function() { $('.alert').fadeOut(); }, 4000);
+    // Demo search dropdown
+    const searchInput = document.getElementById('navSearch');
+    const searchResults = document.getElementById('searchResults');
+    if (searchInput && searchResults) {
+        searchInput.addEventListener('focus', () => {
+            if (searchInput.value.trim().length > 0) searchResults.classList.add('show');
+        });
+        searchInput.addEventListener('input', () => {
+            if (searchInput.value.trim().length > 0) searchResults.classList.add('show');
+            else searchResults.classList.remove('show');
+        });
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.navbar-search')) searchResults.classList.remove('show');
+        });
+    }
 
-    // TODO: Konfirmo fshirje - zëvendëso confirm() me modal custom
-    // $('.btn-delete').on('click', function(e) { ... });
-
-    // TODO: Hamburger menu toggle për mobile
-    // $('.hamburger').on('click', function() { $('.navbar-menu').toggleClass('open'); });
-
-    // TODO: Mbyll navbar kur klikon jashtë
-    // $(document).on('click', function(e) { ... });
-
+    // Time slot picker (reserve)
+    document.querySelectorAll('.time-slots').forEach(group => {
+        group.addEventListener('click', (e) => {
+            const slot = e.target.closest('.time-slot');
+            if (!slot || slot.classList.contains('unavailable')) return;
+            group.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+            slot.classList.add('selected');
+        });
+    });
 });

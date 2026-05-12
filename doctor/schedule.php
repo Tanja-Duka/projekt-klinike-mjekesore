@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-// doctor/schedule.php - Orari i vizitave (pamje lexim-vetëm)
+// doctor/schedule.php
 // ============================================================
 
 require_once dirname(__DIR__) . '/config/config.php';
@@ -9,101 +9,108 @@ requireRole(ROLE_DOCTOR);
 
 $doctorId = getCurrentUserId();
 
-// Merr orarin e punës nga tabela schedules
-$schedule = getDoctorSchedule($doctorId);
+// Week offset (0 = this week, -1 = last, +1 = next)
+$weekOffset = cleanInt($_GET['week'] ?? 0);
 
-// Merr takimet e 14 ditëve të ardhshme me emrat e pacientëve
-$upcomingAppointments = db()->fetchAll(
+// Monday of the target week
+$monday = new DateTime();
+$monday->modify('monday this week');
+$monday->modify(($weekOffset >= 0 ? '+' : '') . $weekOffset . ' weeks');
+
+$sunday = clone $monday;
+$sunday->modify('+6 days');
+
+$weekDays = [];
+for ($i = 0; $i < 7; $i++) {
+    $d = clone $monday;
+    $d->modify("+$i days");
+    $weekDays[] = $d;
+}
+
+// Fetch appointments for the week
+$appointments = db()->fetchAll(
     "SELECT a.appointment_date, a.time_slot, a.status,
-            u.name AS patient_name, u.phone AS patient_phone,
-            s.name AS service_name, a.id
+            u.name AS patient_name, s.name AS service_name, a.id
      FROM appointments a
      JOIN users u ON a.patient_id = u.id
      JOIN services s ON a.service_id = s.id
      WHERE a.doctor_id = ?
-       AND a.appointment_date >= CURDATE()
-       AND a.appointment_date <= DATE_ADD(CURDATE(), INTERVAL 14 DAY)
+       AND a.appointment_date >= ?
+       AND a.appointment_date <= ?
        AND a.status IN (?, ?)
-     ORDER BY a.appointment_date ASC, a.time_slot ASC",
-    [$doctorId, STATUS_PENDING, STATUS_CONFIRMED]
+     ORDER BY a.time_slot ASC",
+    [$doctorId, $monday->format('Y-m-d'), $sunday->format('Y-m-d'), STATUS_PENDING, STATUS_CONFIRMED]
 );
 
-// Grupo takimet sipas datës për t'i shfaqur si kalendarik
-$appointmentsByDate = [];
-foreach ($upcomingAppointments as $appt) {
-    $appointmentsByDate[$appt['appointment_date']][] = $appt;
+// Index by date+time
+$byDateSlot = [];
+foreach ($appointments as $a) {
+    $byDateSlot[$a['appointment_date']][$a['time_slot']] = $a;
 }
 
-$days = DAYS_SQ;
+// Working time slots to display
+$timeSlots = ['09:00','10:00','11:00','13:00','14:00','15:00','16:00','17:00'];
 
+$today = date('Y-m-d');
+$dayLabels = ['Hën','Mar','Mër','Enj','Pre','Sht','Die'];
 
-$pageTitle  = 'Orari Im';
-$cssFile    = 'dashboard.css';
+$totalAppts = count($appointments);
+
+$pageTitle = 'Orari Im — ' . APP_NAME;
+$cssFile   = 'dashboard.css';
 include BASE_PATH . '/includes/header.php';
+include BASE_PATH . '/includes/navbar.php';
 ?>
+
 <div class="dashboard-wrapper">
 <?php $sidebarRole = 'doctor'; include BASE_PATH . '/includes/sidebar.php'; ?>
+
 <main class="main-content">
+
     <div class="content-header">
-        <h1>Orari Im</h1>
+        <div>
+            <div class="eyebrow"><?= $monday->format('j') ?> — <?= $sunday->format('j M Y') ?></div>
+            <h1>Orari <em class="serif-italic">i javës</em>.</h1>
+            <p style="color:var(--ink-2);margin-top:6px;"><?= $totalAppts ?> takime gjithsej këtë javë.</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <a href="?week=<?= $weekOffset - 1 ?>" class="btn btn-outline btn-sm">‹ Java e kaluar</a>
+            <a href="?week=0" class="btn btn-outline btn-sm">Sot</a>
+            <a href="?week=<?= $weekOffset + 1 ?>" class="btn btn-outline btn-sm">Java tjetër ›</a>
+        </div>
     </div>
 
     <?php displayFlashMessage(); ?>
 
-    <!-- Oraret e punës -->
-    <div class="data-section mb-24">
-        <div class="data-section-header">
-            <h3>Oraret e Punës (sipas ditëve)</h3>
+    <div class="schedule-grid">
+        <!-- Header row -->
+        <div class="schedule-cell schedule-row-head">Ora</div>
+        <?php foreach ($weekDays as $i => $day): ?>
+        <div class="schedule-cell schedule-col-head <?= $day->format('Y-m-d') === $today ? 'today' : '' ?>">
+            <?= $dayLabels[$i] ?> <strong><?= $day->format('j') ?></strong>
         </div>
-        <?php if (empty($schedule)): ?>
-            <div class="empty-state"><p>Nuk keni orar të caktuar ende. Kontaktoni administratorin.</p></div>
-        <?php else: ?>
-        <div class="table-wrap">
-            <table class="data-table">
-                <thead><tr><th>Dita</th><th>Ora Fillimit</th><th>Ora Mbarimit</th></tr></thead>
-                <tbody>
-                <?php foreach ($schedule as $s): ?>
-                <tr>
-                    <td><strong><?= e($days[$s['day_of_week']] ?? $s['day_of_week']) ?></strong></td>
-                    <td><?= e($s['start_time']) ?></td>
-                    <td><?= e($s['end_time']) ?></td>
-                </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+        <?php endforeach; ?>
+
+        <!-- Time rows -->
+        <?php foreach ($timeSlots as $slot): ?>
+        <div class="schedule-cell schedule-row-head"><?= e($slot) ?></div>
+        <?php foreach ($weekDays as $day): ?>
+        <?php
+            $dateKey = $day->format('Y-m-d');
+            $appt = $byDateSlot[$dateKey][$slot] ?? null;
+        ?>
+        <div class="schedule-cell">
+            <?php if ($appt): ?>
+            <div class="schedule-event <?= e($appt['status']) ?>">
+                <strong><?= e(explode(' ', $appt['patient_name'])[0]) ?> <?= e(explode(' ', $appt['patient_name'])[1][0] ?? '') ?>.</strong><?= e($appt['service_name']) ?>
+            </div>
+            <?php endif; ?>
         </div>
-        <?php endif; ?>
+        <?php endforeach; ?>
+        <?php endforeach; ?>
     </div>
 
-    <!-- Takimet e 14 ditëve të ardhshme -->
-    <div class="data-section">
-        <div class="data-section-header">
-            <h3>Takimet e 14 Ditëve të Ardhshme</h3>
-        </div>
-        <?php if (empty($appointmentsByDate)): ?>
-            <div class="empty-state"><p>Nuk keni takime të planifikuara.</p></div>
-        <?php else: ?>
-            <div style="padding:16px;">
-            <?php foreach ($appointmentsByDate as $date => $appts): ?>
-                <h4 style="margin-bottom:10px;color:var(--color-primary);"><?= formatDateSq($date) ?></h4>
-                <?php foreach ($appts as $appt): ?>
-                <div class="appointment-card mb-8">
-                    <div class="appt-date-box" style="background:rgba(30,107,114,0.08);">
-                        <div class="appt-date-day" style="font-size:1.1rem;"><?= e($appt['time_slot']) ?></div>
-                    </div>
-                    <div class="appt-info">
-                        <h4><?= e($appt['patient_name']) ?></h4>
-                        <p><?= e($appt['service_name']) ?> · <?= e($appt['patient_phone'] ?? '') ?></p>
-                    </div>
-                    <?= getStatusBadge($appt['status']) ?>
-                </div>
-                <?php endforeach; ?>
-                <hr style="border:none;border-top:1px solid var(--color-border);margin:16px 0;">
-            <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </div>
 </main>
 </div>
-<?php include BASE_PATH . '/includes/footer.php';
 
+<?php include BASE_PATH . '/includes/footer.php'; ?>
