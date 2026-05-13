@@ -99,7 +99,7 @@ include BASE_PATH . '/includes/navbar.php';
                 <div class="alert alert-error"><?= e($errors['general']) ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="<?= BASE_URL ?>/public/register.php" novalidate>
+            <form id="registerForm" method="POST" action="<?= BASE_URL ?>/public/register.php" novalidate>
                 <?= csrfInput() ?>
 
                 <div class="form-group">

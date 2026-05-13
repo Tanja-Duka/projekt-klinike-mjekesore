@@ -52,6 +52,8 @@ $sql .= " ORDER BY created_at DESC";
 
 $queries     = db()->fetchAll($sql, $params);
 $unreadCount = count(array_filter($queries, fn($q) => $q['status'] === QUERY_UNREAD));
+$readCount   = count(array_filter($queries, fn($q) => $q['status'] === QUERY_READ));
+$resolvedCount = count(array_filter($queries, fn($q) => $q['status'] === QUERY_RESOLVED));
 
 $pageTitle = 'Mesazhet e Kontaktit — ' . APP_NAME;
 $cssFile   = 'dashboard.css';
@@ -61,20 +63,32 @@ include BASE_PATH . '/includes/navbar.php';
 ?>
 
 <style>
-.cq-grid{display:grid;grid-template-columns:360px 1fr;gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;min-height:520px;}
-.cq-list{border-right:1px solid var(--line);overflow-y:auto;max-height:660px;}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.filter-chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:1.5px solid var(--line);border-radius:20px;font-size:.8rem;text-decoration:none;color:var(--ink-2);background:var(--page);transition:border-color .15s,background .15s;}
+.filter-chip:hover{border-color:var(--accent);color:var(--ink-1);}
+.filter-chip.active{border-color:var(--accent);background:var(--accent-tint,#f5efe8);color:var(--ink-1);font-weight:600;}
+.filter-chip span{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;background:var(--line);border-radius:9px;font-size:.68rem;font-weight:700;color:var(--ink-2);}
+.filter-chip.active span{background:var(--accent);color:#fff;}
+
+.cq-grid{display:grid;grid-template-columns:340px 1fr;gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;min-height:520px;}
+.cq-list{border-right:1px solid var(--line);overflow-y:auto;max-height:680px;}
 .cq-item{display:block;padding:14px 16px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;transition:background .15s;cursor:pointer;border-left:3px solid transparent;}
 .cq-item:hover{background:var(--accent-tint,#faf7f2);}
 .cq-item.active{background:#f5f1e8;border-left-color:var(--accent);}
-.cq-item.unread .cq-item-name::before{content:"";display:inline-block;width:7px;height:7px;background:var(--accent);border-radius:50%;margin-right:7px;vertical-align:middle;}
-.cq-item-name{font-size:.88rem;font-weight:600;margin-bottom:2px;}
-.cq-item-subject{font-size:.8rem;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cq-item-meta{font-size:.72rem;color:var(--ink-3);margin-top:4px;}
-.cq-detail{padding:28px;display:flex;flex-direction:column;gap:20px;}
-.cq-detail-header h3{margin:0 0 4px;font-size:1.1rem;}
-.cq-detail-meta{font-size:.82rem;color:var(--ink-3);}
-.cq-body{background:var(--surface,#f9f7f3);border-radius:10px;padding:18px;line-height:1.8;font-size:.9rem;white-space:pre-wrap;}
-.cq-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--ink-3);gap:10px;}
+.cq-item .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.cq-item .hd strong{font-size:.86rem;font-weight:600;color:var(--ink-1);}
+.cq-item .hd .dt{font-size:.68rem;color:var(--ink-3);white-space:nowrap;}
+.cq-item.unread .hd strong::before{content:"";display:inline-block;width:7px;height:7px;background:var(--accent);border-radius:50%;margin-right:6px;vertical-align:middle;}
+.cq-item .sub{font-size:.8rem;color:var(--ink-2);font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cq-item .pv{font-size:.74rem;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.cq-detail{padding:28px 30px;display:flex;flex-direction:column;gap:18px;}
+.cq-detail h3{margin:0;font-size:1.15rem;font-weight:600;color:var(--ink-1);}
+.cq-detail .meta{font-size:.82rem;color:var(--ink-3);line-height:1.6;}
+.cq-detail .meta strong{color:var(--ink-2);}
+.cq-detail .body{background:var(--surface,#f9f7f3);border-radius:10px;padding:18px 20px;line-height:1.8;font-size:.9rem;white-space:pre-wrap;color:var(--ink-1);}
+.cq-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.cq-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--ink-3);gap:12px;padding:40px;}
 </style>
 
 <div class="dashboard-wrapper">
@@ -86,22 +100,32 @@ include BASE_PATH . '/includes/navbar.php';
         <div>
             <div class="eyebrow">Admin — Komunikim</div>
             <h1>Mesazhet e <em class="serif-italic">kontaktit</em>.</h1>
-            <p style="color:var(--ink-2);margin-top:6px;"><?= count($queries) ?> mesazhe<?= $unreadCount > 0 ? ' · <strong>' . $unreadCount . ' të palexuara</strong>' : '' ?>.</p>
+            <p style="color:var(--ink-2);margin-top:6px;">
+                <?= count($queries) ?> mesazhe<?= $unreadCount > 0 ? ' · <strong>' . $unreadCount . ' të palexuara</strong>' : '' ?>.
+            </p>
         </div>
     </div>
 
     <?php displayFlashMessage(); ?>
 
     <!-- Filter chips -->
-    <div class="filter-tabs" style="margin-bottom:20px;">
+    <div class="filter-bar">
         <a href="<?= BASE_URL ?>/doctor/admin/contact-queries.php"
-           class="filter-tab <?= $filterStatus === '' ? 'active' : '' ?>">Të gjitha</a>
+           class="filter-chip <?= $filterStatus === '' ? 'active' : '' ?>">
+            Të gjitha <span><?= count($queries) ?></span>
+        </a>
         <a href="<?= BASE_URL ?>/doctor/admin/contact-queries.php?status=<?= urlencode(QUERY_UNREAD) ?>"
-           class="filter-tab <?= $filterStatus === QUERY_UNREAD ? 'active' : '' ?>">Të palexuara</a>
+           class="filter-chip <?= $filterStatus === QUERY_UNREAD ? 'active' : '' ?>">
+            Të palexuara <span><?= $unreadCount ?></span>
+        </a>
         <a href="<?= BASE_URL ?>/doctor/admin/contact-queries.php?status=<?= urlencode(QUERY_READ) ?>"
-           class="filter-tab <?= $filterStatus === QUERY_READ ? 'active' : '' ?>">Të lexuara</a>
+           class="filter-chip <?= $filterStatus === QUERY_READ ? 'active' : '' ?>">
+            Të lexuara <span><?= $readCount ?></span>
+        </a>
         <a href="<?= BASE_URL ?>/doctor/admin/contact-queries.php?status=<?= urlencode(QUERY_RESOLVED) ?>"
-           class="filter-tab <?= $filterStatus === QUERY_RESOLVED ? 'active' : '' ?>">Të zgjidhura</a>
+           class="filter-chip <?= $filterStatus === QUERY_RESOLVED ? 'active' : '' ?>">
+            Të zgjidhura <span><?= $resolvedCount ?></span>
+        </a>
     </div>
 
     <!-- Two-panel layout -->
@@ -111,7 +135,7 @@ include BASE_PATH . '/includes/navbar.php';
         <div class="cq-list">
             <?php if (empty($queries)): ?>
             <div style="padding:40px;text-align:center;color:var(--ink-3);">
-                <p>Nuk ka mesazhe.</p>
+                <p style="font-size:.88rem;">Nuk ka mesazhe.</p>
             </div>
             <?php else: ?>
             <?php foreach ($queries as $q): ?>
@@ -120,19 +144,12 @@ include BASE_PATH . '/includes/navbar.php';
                 ['view' => $q['id']]
             )) ?>"
                class="cq-item <?= $q['status'] === QUERY_UNREAD ? 'unread' : '' ?> <?= $viewId === (int)$q['id'] ? 'active' : '' ?>">
-                <div class="cq-item-name"><?= e($q['name']) ?></div>
-                <div class="cq-item-subject"><?= e($q['subject']) ?></div>
-                <div class="cq-item-meta">
-                    <?= formatDateTimeSq($q['created_at']) ?>
-                    &nbsp;·&nbsp;
-                    <?php if ($q['status'] === QUERY_UNREAD): ?>
-                        <span style="color:var(--accent);font-weight:600;">E palexuar</span>
-                    <?php elseif ($q['status'] === QUERY_RESOLVED): ?>
-                        <span style="color:var(--success,#27ae60);">E zgjidhur</span>
-                    <?php else: ?>
-                        <span>E lexuar</span>
-                    <?php endif; ?>
+                <div class="hd">
+                    <strong><?= e($q['name']) ?></strong>
+                    <span class="dt"><?= e(date('d/m/Y', strtotime($q['created_at']))) ?></span>
                 </div>
+                <div class="sub"><?= e($q['subject']) ?></div>
+                <div class="pv"><?= e(mb_substr($q['message'], 0, 70)) ?>…</div>
             </a>
             <?php endforeach; ?>
             <?php endif; ?>
@@ -142,28 +159,43 @@ include BASE_PATH . '/includes/navbar.php';
         <div class="cq-detail">
             <?php if ($viewQuery): ?>
 
-            <div class="cq-detail-header">
-                <h3><?= e($viewQuery['subject']) ?></h3>
-                <div class="cq-detail-meta">
-                    <strong><?= e($viewQuery['name']) ?></strong>
-                    &lt;<?= e($viewQuery['email']) ?>&gt;
-                    <?php if (!empty($viewQuery['phone'])): ?>
-                    · <?= e($viewQuery['phone']) ?>
-                    <?php endif; ?>
-                    &nbsp;·&nbsp; <?= formatDateTimeSq($viewQuery['created_at']) ?>
-                </div>
+            <h3><?= e($viewQuery['subject']) ?></h3>
+
+            <div class="meta">
+                <strong><?= e($viewQuery['name']) ?></strong>
+                &lt;<?= e($viewQuery['email']) ?>&gt;
+                <?php if (!empty($viewQuery['phone'])): ?>
+                · <?= e($viewQuery['phone']) ?>
+                <?php endif; ?>
+                <br>
+                <?= formatDateTimeSq($viewQuery['created_at']) ?>
+                &nbsp;·&nbsp;
+                <?php if ($viewQuery['status'] === QUERY_UNREAD): ?>
+                    <span style="color:var(--accent);font-weight:600;">E palexuar</span>
+                <?php elseif ($viewQuery['status'] === QUERY_RESOLVED): ?>
+                    <span style="color:var(--success,#27ae60);font-weight:600;">E zgjidhur</span>
+                <?php else: ?>
+                    <span>E lexuar</span>
+                <?php endif; ?>
             </div>
 
-            <div class="cq-body"><?= e($viewQuery['message']) ?></div>
+            <div class="body"><?= e($viewQuery['message']) ?></div>
 
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div class="cq-actions">
                 <?php if ($viewQuery['status'] !== QUERY_RESOLVED): ?>
                 <form method="POST" action="" style="margin:0;">
                     <?= csrfInput() ?>
                     <input type="hidden" name="action" value="resolve">
                     <input type="hidden" name="query_id" value="<?= (int)$viewQuery['id'] ?>">
-                    <input type="hidden" name="view" value="<?= (int)$viewId ?>">
                     <button type="submit" class="btn btn-cta btn-sm">Shëno si Zgjidhur</button>
+                </form>
+                <?php endif; ?>
+                <?php if ($viewQuery['status'] === QUERY_UNREAD): ?>
+                <form method="POST" action="" style="margin:0;">
+                    <?= csrfInput() ?>
+                    <input type="hidden" name="action" value="read">
+                    <input type="hidden" name="query_id" value="<?= (int)$viewQuery['id'] ?>">
+                    <button type="submit" class="btn btn-outline btn-sm">Shëno si i Lexuar</button>
                 </form>
                 <?php endif; ?>
                 <form method="POST" action="" style="margin:0;" onsubmit="return confirm('Fshij mesazhin?')">
@@ -176,13 +208,13 @@ include BASE_PATH . '/includes/navbar.php';
                     </button>
                 </form>
                 <a href="<?= BASE_URL ?>/doctor/admin/contact-queries.php<?= $filterStatus ? '?status=' . urlencode($filterStatus) : '' ?>"
-                   class="btn btn-ghost btn-sm">← Kthehu</a>
+                   class="btn btn-ghost btn-sm" style="margin-left:auto;">← Kthehu</a>
             </div>
 
             <?php else: ?>
             <div class="cq-empty">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" width="36" height="36" style="opacity:.3"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <p style="font-size:.88rem;">Zgjidhni një mesazh nga lista për ta lexuar.</p>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" width="40" height="40" style="opacity:.25"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <p style="font-size:.88rem;text-align:center;">Zgjidhni një mesazh nga lista për ta lexuar.</p>
             </div>
             <?php endif; ?>
         </div>

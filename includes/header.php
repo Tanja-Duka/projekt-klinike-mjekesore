@@ -22,5 +22,6 @@
             <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/<?= e($css) ?>">
         <?php endforeach; ?>
     <?php endif; ?>
+    <script>var BASE_URL = '<?= BASE_URL ?>';</script>
 </head>
 <body>

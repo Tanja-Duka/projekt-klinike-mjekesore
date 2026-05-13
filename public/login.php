@@ -66,7 +66,7 @@ include BASE_PATH . '/includes/navbar.php';
                 <div class="alert alert-error"><?= e($errors['general']) ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="<?= BASE_URL ?>/public/login.php" novalidate>
+            <form id="loginForm" method="POST" action="<?= BASE_URL ?>/public/login.php" novalidate>
                 <?= csrfInput() ?>
 
                 <div class="form-group">
