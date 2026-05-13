@@ -43,7 +43,7 @@ include BASE_PATH . '/includes/navbar.php';
                 <p style="margin-top:16px;">Sot kemi tre kate, 23 specialitete dhe një laborator të integruar — por filozofia është e njëjta. Çdo pacient takohet pa nxitim, dëgjohet plotësisht dhe ndiqet derisa të kthehet në formë.</p>
                 <p style="margin-top:16px;">Besojmë se mjekësia më e mirë vjen nga marrëdhënia e gjatë mjek–pacient. Prandaj 8 nga 10 pacientë tanë vijnë rregullisht, ndërsa 6 nga 10 na rekomandojnë familjarëve.</p>
             </div>
-            <div class="about-image">[ Foto e klinikës ]</div>
+            <div class="about-image"><img src="<?= BASE_URL ?>/assets/img/interior.jpeg" alt="Klinika Vitanova" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"></div>
         </div>
 
         <!-- Stats -->
@@ -64,7 +64,7 @@ include BASE_PATH . '/includes/navbar.php';
 
         <!-- Vlerat -->
         <div class="about-grid">
-            <div class="about-image">[ Foto e ekipit ]</div>
+            <div class="about-image"><img src="<?= BASE_URL ?>/assets/img/ekipi.jpeg" alt="Ekipi i Vitanova" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;"></div>
             <div>
                 <div class="eyebrow mb-16">Vlerat</div>
                 <h2 class="mb-24" style="font-size:2rem;">

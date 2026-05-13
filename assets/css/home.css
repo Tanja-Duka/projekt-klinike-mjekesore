@@ -302,6 +302,15 @@
     display: inline-flex; align-items: center; justify-content: center;
     border: 1px solid var(--line);
 }
+.svc-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.svc-cat {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--ink-3); font-weight: 600;
+}
 .service-card h3 {
     font-size: 1.25rem; font-family: var(--serif); font-weight: 400;
 }

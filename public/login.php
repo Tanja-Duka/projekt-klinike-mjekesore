@@ -113,13 +113,15 @@ include BASE_PATH . '/includes/navbar.php';
         </div>
     </div>
 
-    <!-- Right: decorative quote -->
-    <div class="auth-shell-right">
-        <div class="auth-quote">
-            <span class="mark">"</span>
-            <h2>Më kanë dëgjuar pa nxitim. Tani familja ime vjen vetëm këtu.</h2>
-            <p>Sistemi dixhital më kursen orë çdo muaj — recetat dhe takimet janë gjithmonë në xhep.</p>
-            <div class="signature">— Arta S. · Pacient që nga 2019</div>
+    <!-- Right: photo + quote overlay -->
+    <div class="auth-shell-right" style="padding:0;background:var(--ink-1);position:relative;overflow:hidden;">
+        <img src="<?= BASE_URL ?>/assets/img/interior.jpeg" alt=""
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.35;">
+        <div style="position:relative;z-index:1;padding:80px 64px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;color:#fff;">
+            <span style="font-family:'Fraunces',serif;font-style:italic;color:var(--accent);font-size:4rem;line-height:1;display:block;margin-bottom:12px;">"</span>
+            <h2 style="font-family:'Fraunces',serif;font-weight:400;font-size:1.9rem;line-height:1.25;letter-spacing:-.02em;margin-bottom:16px;">Më kanë dëgjuar pa nxitim. Tani familja ime vjen vetëm këtu.</h2>
+            <p style="font-size:.9rem;opacity:.7;margin-bottom:20px;">Sistemi dixhital më kursen orë çdo muaj — recetat dhe takimet janë gjithmonë në xhep.</p>
+            <div style="font-size:.8rem;opacity:.55;letter-spacing:.04em;">— Arta S. · Pacient që nga 2019</div>
         </div>
     </div>
 

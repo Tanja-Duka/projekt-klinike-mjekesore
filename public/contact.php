@@ -103,7 +103,7 @@ include BASE_PATH . '/includes/navbar.php';
 </style>
 
 <!-- Hero -->
-<section class="contact-hero" style="--photo: url('https://images.unsplash.com/photo-1538108149393-fbbd81895907?w=1800&q=80&auto=format&fit=crop')">
+<section class="contact-hero" style="--photo: url('<?= BASE_URL ?>/assets/img/background.jpeg')">
     <div class="container">
         <div class="eyebrow">Kontakt — Të na gjeni</div>
         <h1>Vizitoni, telefononi <em>ose na shkruani</em>.</h1>
@@ -182,7 +182,7 @@ include BASE_PATH . '/includes/navbar.php';
 
             <!-- Form -->
             <div class="contact-form-wrap">
-                <div class="contact-form-img" style="--photo: url('https://images.unsplash.com/photo-1631815589968-fdb09a223b1e?w=1200&q=80&auto=format&fit=crop');background-image:var(--photo);"></div>
+                <div class="contact-form-img" style="--photo: url('<?= BASE_URL ?>/assets/img/form.jpeg');background-image:var(--photo);"></div>
                 <form class="contact-form" method="POST" action="<?= BASE_URL ?>/public/contact.php" novalidate>
                     <?= csrfInput() ?>
 

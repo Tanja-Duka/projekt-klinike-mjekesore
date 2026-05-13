@@ -21,6 +21,45 @@ $displayServices = empty($activeCategory)
     ? $services
     : array_filter($services, fn($s) => $s['category'] === $activeCategory);
 
+// Map icon names → SVG paths + accent color
+$iconMap = [
+    'heart' => [
+        'color' => '#e8454a',
+        'bg'    => '#fff0f0',
+        'svg'   => '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>',
+    ],
+    'brain' => [
+        'color' => '#7c5cbf',
+        'bg'    => '#f3eeff',
+        'svg'   => '<path d="M9.5 2a4.5 4.5 0 0 1 4.48 4.05A4 4 0 0 1 17 10a4 4 0 0 1-.5 1.94A4.5 4.5 0 0 1 14 20H9a5 5 0 0 1-1-9.9V10a4.5 4.5 0 0 1 1.5-8.07V2zm5 0a4.5 4.5 0 0 1 1.5 8.07V10a4.5 4.5 0 0 1-1.5 8.07"/><line x1="12" y1="10" x2="12" y2="20"/>',
+    ],
+    'skin'  => [
+        'color' => '#c97d3a',
+        'bg'    => '#fdf3e8',
+        'svg'   => '<circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>',
+    ],
+    'bone'  => [
+        'color' => '#3a7abf',
+        'bg'    => '#e8f2ff',
+        'svg'   => '<path d="M17 2a3 3 0 0 1 0 6h-1v8h1a3 3 0 0 1 0 6 3 3 0 0 1-3-3v-1H9v1a3 3 0 0 1-3 3 3 3 0 0 1 0-6h1V8H6a3 3 0 0 1 0-6 3 3 0 0 1 3 3v1h6V5a3 3 0 0 1 3-3z"/>',
+    ],
+    'child' => [
+        'color' => '#3aab6d',
+        'bg'    => '#e8faf2',
+        'svg'   => '<circle cx="12" cy="7" r="4"/><path d="M12 11v10M8 15l4-2 4 2M7 21h10"/>',
+    ],
+    'flask' => [
+        'color' => '#1a8fa0',
+        'bg'    => '#e6f7fa',
+        'svg'   => '<path d="M9 3h6M9 3v8L5.5 17A2 2 0 0 0 7.35 20h9.3a2 2 0 0 0 1.85-3L15 11V3"/><line x1="6" y1="14" x2="18" y2="14"/>',
+    ],
+    'xray'  => [
+        'color' => '#5a6a8a',
+        'bg'    => '#edf0f7',
+        'svg'   => '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="9" y2="15"/><line x1="15" y1="9" x2="15" y2="15"/><path d="M9 12h6M7 9h2M15 9h2M7 15h2M15 15h2"/>',
+    ],
+];
+
 $pageTitle = 'Shërbimet — ' . APP_NAME;
 $cssFile   = 'home.css';
 include BASE_PATH . '/includes/header.php';
@@ -61,23 +100,18 @@ include BASE_PATH . '/includes/navbar.php';
         <?php else: ?>
         <div class="services-grid">
             <?php foreach ($displayServices as $s):
-                $hasPhoto = !empty($s['photo_path']);
+                $iconKey  = strtolower(trim($s['icon'] ?? ''));
+                $ico      = $iconMap[$iconKey] ?? ['color'=>'var(--accent)','bg'=>'var(--surface,#f5f1e8)','svg'=>'<path d="M12 5v14M5 12h14"/>'];
             ?>
-            <div class="service-card<?= $hasPhoto ? ' has-photo' : '' ?>"
-                 <?= $hasPhoto ? 'style="--photo: url(\'' . BASE_URL . '/' . e($s['photo_path']) . '\')"' : '' ?>>
-
-                <?php if ($hasPhoto): ?>
-                <div class="service-photo"><span class="photo-tag"><?= e($s['name']) ?></span></div>
-                <?php endif; ?>
-
+            <div class="service-card">
                 <div class="service-body">
-                    <span class="ico">
-                        <?php if (!empty($s['icon'])): ?>
-                            <span style="font-size:1.4rem;line-height:1;"><?= $s['icon'] ?></span>
-                        <?php else: ?>
-                        <svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                        <?php endif; ?>
-                    </span>
+                    <div class="svc-icon" style="background:<?= $ico['bg'] ?>;color:<?= $ico['color'] ?>;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                             stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+                            <?= $ico['svg'] ?>
+                        </svg>
+                    </div>
+                    <div class="svc-cat"><?= e($s['category']) ?></div>
                     <h3><?= e($s['name']) ?></h3>
                     <?php if (!empty($s['description'])): ?>
                     <p><?= e($s['description']) ?></p>
